@@ -13,9 +13,9 @@ class ANSIEscape:
 
 
 class ButtonListener:
-    getter = None
+    _getter = None
     cb = None
-    debounce = True
+    _debounce = True
 
     def __init__(self, getter, cb, debounce=True):
         """
@@ -24,6 +24,6 @@ class ButtonListener:
         :param cb: a callback function to execute when the button is pressed
         :param debounce: should the button listener perform a software debounce?
         """
-        self.getter = getter
+        self._getter = getter
         self.cb = cb
-        self.debounce = debounce
+        self._debounce = debounce
