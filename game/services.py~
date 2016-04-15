@@ -23,8 +23,8 @@ class ANSIEscape:
 			start_x = 48
 		start_y = 2
 		ret_seq = "\033[47m"
-		ret_seq += ANSIEscape.move_cursor(start_x, start_y)
 		if number == 0:
+			ret_seq += ANSIEscape.move_cursor(start_x, start_y)
 			ret_seq += "   "
 			for i in range(0, 3):
 				start_y += 1
@@ -38,11 +38,9 @@ class ANSIEscape:
 			start_y += 1
 			ret_seq += ANSIEscape.move_cursor(start_x, start_y)
 			ret_seq += "   "
+			return ret_seq
 		elif number == 1:
-			ret_seq += ANSIEscape.move_cursor(start_x + 3, start_y)
-			for i in range(0, 5):
-				ret_seq += ANSIEscape.move_cursor(start_x, start_y + i)
-				ret_seq += " "
+			pass
 		elif number == 2:
 			pass
 		elif number == 3:
@@ -59,4 +57,3 @@ class ANSIEscape:
 			pass
 		elif number == 9:
 			pass
-		return ret_seq
