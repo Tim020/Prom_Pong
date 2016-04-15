@@ -5,6 +5,7 @@ In your command line: make sure you are in the project's root directory then run
 $ python -m unittest discover game/tests
 ```
 or in PyCharm:
+
 1. In the run menu, edit configurations.
 2. Create a new configuration by clicking + and selecting Python tests > Unittests.
 3. Choose a name
