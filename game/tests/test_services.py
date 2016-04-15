@@ -40,3 +40,26 @@ class TestANSIEscape(TestCase):
         with self.assertRaises(TypeError):
             escape.move_cursor(0.5, 2)
             escape.move_cursor("0", "2")
+
+    def test_set_graphics(self):
+        """
+        .set_graphics should return the sequence to change the settings given in the args
+        """
+        attr = 8
+        fore = 30
+        back = 40
+        code = escape.set_graphics(attr, fore, back)
+        self.assertEqual(code, "\e[{};{};{}m".format(attr, fore, back))
+
+    def test_set_graphics_illegal_args(self):
+        """
+        .set_graphics should raise an exception if the args given to it are illegal
+        """
+        with self.assertRaises(ValueError):
+            escape.set_graphics(3, 30, 40)
+            escape.set_graphics(0, -4, 47)
+            escape.set_graphics(0, 33, 50)
+
+        with self.assertRaises(TypeError):
+            escape.set_graphics("0", "30", 47)
+            escape.set_graphics(0.0, 30.1, 47.0)
