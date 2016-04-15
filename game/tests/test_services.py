@@ -11,3 +11,32 @@ class TestANSIEscape(TestCase):
         """
         code = escape.clear_screen()
         self.assertEqual(code, "\e[2J")
+
+    def test_move_cursor_no_args(self):
+        """
+        .move_cursor should return the sequence for moving the cursor when it is given no args
+        """
+        code = escape.move_cursor()
+        self.assertEqual(code, "\e[0;0H")
+
+    def test_move_cursor_args(self):
+        """
+        .move_cursor should return the sequence to move the char to the given args
+        """
+        x = 12
+        y = 8
+        code = escape.move_cursor(x, y)
+        self.assertEqual(code, "\e[{};{}H".format(x, y))
+
+    def test_move_cursor_illegal_args(self):
+        """
+        .move_cursor should raise an exception if the args given to it are illegal, eg. out of range
+        """
+        with self.assertRaises(ValueError):
+            escape.move_cursor(120, 90)
+            escape.move_cursor(-1, 0)
+            escape.move_cursor(0, 180)
+
+        with self.assertRaises(TypeError):
+            escape.move_cursor(0.5, 2)
+            escape.move_cursor("0", "2")
