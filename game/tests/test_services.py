@@ -3,6 +3,7 @@ from game.services import ANSIEscape
 
 escape = ANSIEscape()
 
+
 class test_ansi_escape(TestCase):
     def test_clear_screen(self):
         """
