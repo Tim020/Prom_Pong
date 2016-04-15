@@ -19,14 +19,14 @@ class TestANSIEscape(TestCase):
         ANSIEscape.clear_screen() should return the escape sequence for clearing the screen
         """
         code = escape.clear_screen()
-        self.assertEqual(code, "\e[2J")
+        self.assertEqual(code, "\033[2J")
 
     def test_move_cursor_no_args(self):
         """
         .move_cursor should return the sequence for moving the cursor when it is given no args
         """
         code = escape.move_cursor()
-        self.assertEqual(code, "\e[0;0H")
+        self.assertEqual(code, "\033[0;0H")
 
     def test_move_cursor_args(self):
         """
@@ -35,7 +35,7 @@ class TestANSIEscape(TestCase):
         x = 12
         y = 8
         code = escape.move_cursor(x, y)
-        self.assertEqual(code, "\e[{};{}H".format(x, y))
+        self.assertEqual(code, "\033[{};{}H".format(y, x))
 
     def test_move_cursor_illegal_args(self):
         """
@@ -58,7 +58,7 @@ class TestANSIEscape(TestCase):
         fore = 30
         back = 40
         code = escape.set_graphics(attr, fore, back)
-        self.assertEqual(code, "\e[{};{};{}m".format(attr, fore, back))
+        self.assertEqual(code, "\033[{};{};{}m".format(attr, fore, back))
 
     def test_set_graphics_illegal_args(self):
         """
