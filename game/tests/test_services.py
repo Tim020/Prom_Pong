@@ -1,7 +1,16 @@
 from unittest import TestCase
-from game.services import ANSIEscape
+from game.services import ANSIEscape, ButtonListener
+
 
 escape = ANSIEscape()
+
+
+def _getter():
+    return "This is the getter"
+
+
+def _callback():
+    return "This is the callback"
 
 
 class TestANSIEscape(TestCase):
@@ -63,3 +72,16 @@ class TestANSIEscape(TestCase):
         with self.assertRaises(TypeError):
             escape.set_graphics("0", "30", 47)
             escape.set_graphics(0.0, 30.1, 47.0)
+
+
+class TestButtonListenerDebounce(TestCase):
+    button = ButtonListener(_getter, _callback)
+
+    def test_constructor(self):
+        self.assertEqual(self.button.cb(), _callback())
+        self.assertEqual(self.button._getter(), _getter())
+        self.assertTrue(self.button._debounce)
+
+
+class TestButtonListenerNoDebounce(TestCase):
+    button = ButtonListener(_getter, _callback, False)
