@@ -19,7 +19,7 @@ class ANSIEscape:
     def get_numerical_text(number, player):
         if player == 0:
             start_x = 29
-        elif player == 1:
+        else:
             start_x = 48
 
         start_y = 2
