@@ -11,14 +11,15 @@ serves = [5, 5]
 score = [0, 0]
 # Size of the player's bats
 bat_size = [4, 4]
-# Top position of the bat for each player
-bat_position = [3, 78]
+# Top position of the bat for each player (initially in the middle)
+bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # Ball position
-ball_position = [0, 0]
+ball_position = [1, 1]
 # Ball motion
 ball_motion = [0, 0]
 
 
+# Used when sending commands to the serial port, send to the console if in a dev environment (ie not on a Pi)
 def output(seq):
     if debug:
         print(repr(seq))
@@ -26,8 +27,59 @@ def output(seq):
         serialPort.write(seq)
 
 
+# Move the ball by motion and re-draws it
+def move_and_draw_ball():
+    # First "un-draw" the current ball
+    output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+    output("\033[42m")
+    output(" ")
+    # Then update the ball position
+    ball_position[0] += ball_motion[0]
+    ball_position[1] += ball_motion[1]
+    # Finally draw the new ball
+    output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+    output("\033[47m")
+    output(" ")
+
+
+# Checks if the ball has hit the top or bottom edge and updates the motion as appropriate
+def check_wall_collision():
+    # Is the ball at the top or bottom edge (ignore x position)
+    if ball_position[1] == 1 or ball_position[1] == window_size[1]:
+        ball_motion[1] *= -1
+
+
+# Checks if the ball has hit a paddle and updates the motion as appropriate
+def check_paddle_collision():
+    if ball_position[0] == 4:
+        if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
+            ball_motion[0] *= -1
+    elif ball_position[0] == window_size[1] - 3:
+        if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
+            ball_motion[0] *= -1
+
+
+# Check if a point has been scored, returns true if there has
+def check_point_scored():
+    if ball_position[0] == 4:
+        if ball_position[1] < bat_position[0] or ball_position[1] > bat_position[0] + bat_size[0]:
+            score[1] += 1
+            return True
+    elif ball_position[0] == window_size[1] - 3:
+        if ball_position[1] < bat_position[1] or ball_position[1] > bat_position[1] + bat_size[1]:
+            score[0] += 1
+            return True
+
+
+# Main loop for a single match (until a point is scored)
+def match():
+    while not check_point_scored():
+        pass
+
+
+# Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
-    # Open Pi serial port, speed 9600 bits per second
+    # Open Pi serial port, speed 57600 bits per second
     serialPort = Serial("/dev/ttyAMA0", 57600)
 
     # Should not need, but just in case
@@ -46,8 +98,8 @@ for i in range(0, window_size[1]):
     output(" " * window_size[0])
 
 # Draw bats for player 1 and 2
-output(ANSIEscape.draw_bat(bat_position[0], (window_size[1] - bat_size[0]) / 2))
-output(ANSIEscape.draw_bat(bat_position[1], (window_size[1] - bat_size[1]) / 2))
+output(ANSIEscape.draw_bat(3, bat_position[0]))
+output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1]))
 
 # Change background colour and draw the net
 output("\033[47m")
@@ -55,6 +107,6 @@ for i in range(0, window_size[1] / 4):
     output(ANSIEscape.set_cursor_position(window_size[0] / 2, 3 + (i * 4)) + " ")
     output(ANSIEscape.set_cursor_position(window_size[0] / 2, 4 + (i * 4)) + " ")
 
-# Draw score for Player 1 and 2
+# Draw score for Player 0 and 1
 output(ANSIEscape.get_numerical_text(score[0], 0))
 output(ANSIEscape.get_numerical_text(score[1], 1))
