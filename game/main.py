@@ -118,7 +118,9 @@ timer = time.time()
 delta = 0
 updates = 0
 
-# Main game loop, keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
+# Main game loop:
+# Runs while no player has a winning score
+# Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
 while score[0] < 10 and score[1] < 10:
     now = time.time()
     delta += (now - last_time) / update_freq
