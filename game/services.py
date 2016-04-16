@@ -8,7 +8,7 @@ class ANSIEscape:
         return "\033[2J"
 
     @staticmethod
-    def move_cursor(x=1, y=1):
+    def set_cursor_position(x=1, y=1):
         return "\033[" + str(y) + ";" + str(x) + "f"
 
     @staticmethod
@@ -17,49 +17,126 @@ class ANSIEscape:
 
     @staticmethod
     def get_numerical_text(number, player):
+        # Determine the start position for the number based on which player it is for
         if player == 0:
             start_x = 29
         else:
             start_x = 48
-
         start_y = 2
+
+        # Set the background colour to be white
         ret_seq = "\033[47m"
-        ret_seq += ANSIEscape.move_cursor(start_x, start_y)
+
+        # Move the cursor to the start position
+        ret_seq += ANSIEscape.set_cursor_position(start_x, start_y)
+
+        # Determine which number is required and get the sequence of characters to send to the serial port
         if number == 0:
             ret_seq += "   "
             for i in range(0, 3):
                 start_y += 1
-                ret_seq += ANSIEscape.move_cursor(start_x, start_y)
+                ret_seq += ANSIEscape.set_cursor_position(start_x, start_y)
                 ret_seq += " "
                 start_x += 2
-                ret_seq += ANSIEscape.move_cursor(start_x, start_y)
+                ret_seq += ANSIEscape.set_cursor_position(start_x, start_y)
                 ret_seq += " "
                 start_x -= 2
-                ret_seq += ANSIEscape.move_cursor(start_x, start_y)
+                ret_seq += ANSIEscape.set_cursor_position(start_x, start_y)
             start_y += 1
-            ret_seq += ANSIEscape.move_cursor(start_x, start_y)
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y)
             ret_seq += "   "
         elif number == 1:
-            ret_seq += ANSIEscape.move_cursor(start_x + 3, start_y)
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 3, start_y)
             for i in range(0, 5):
-                ret_seq += ANSIEscape.move_cursor(start_x, start_y + i)
+                ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i)
                 ret_seq += " "
         elif number == 2:
-            pass
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 4)
+            ret_seq += "   "
         elif number == 3:
-            pass
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 4)
+            ret_seq += "   "
         elif number == 4:
-            pass
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 3, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 3, start_y + 4)
+            ret_seq += " "
         elif number == 5:
-            pass
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 4)
+            ret_seq += "   "
         elif number == 6:
-            pass
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 4)
+            ret_seq += "   "
         elif number == 7:
-            pass
+            ret_seq += "   "
+            for i in range(1, 5):
+                ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i)
+                ret_seq += " "
         elif number == 8:
-            pass
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 4)
+            ret_seq += "   "
         elif number == 9:
-            pass
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 1)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
+            ret_seq += "   "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 3)
+            ret_seq += " "
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 4)
+            ret_seq += " "
         return ret_seq
 
 

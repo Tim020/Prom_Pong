@@ -1,40 +1,39 @@
-from serial import Serial 
-import time
+from serial import Serial
 from services import ANSIEscape
 
 # Open Pi serial port, speed 9600 bits per second
 serialPort = Serial("/dev/ttyAMA0", 57600)
 
 # Should not need, but just in case
-if (serialPort.isOpen() == False): 
+if not serialPort.isOpen():
     serialPort.open()
 
-#Initial clear of the screen
+# Initial clear of the screen
 serialPort.write(ANSIEscape.clear_screen())
 serialPort.write(ANSIEscape.reset_cursor())
 
-#Set the background colour
+# Set the background colour
 serialPort.write("\033[42m")
 
-#Draw the background colour
+# Draw the background colour
 for i in range(0, 20):
-	serialPort.write(" " * 80)
+    serialPort.write(" " * 80)
 
-#Change background color and draw bat 1
+# Change background color and draw bat 1
 serialPort.write("\033[40m")
 for i in range(0, 4):
-	serialPort.write(ANSIEscape.move_cursor(3, 8+i) + " ")
+    serialPort.write(ANSIEscape.set_cursor_position(3, 8 + i) + " ")
 
-#Draw bat 2
+# Draw bat 2
 for i in range(0, 4):
-	serialPort.write(ANSIEscape.move_cursor(78, 8+i) + " ")
+    serialPort.write(ANSIEscape.set_cursor_position(78, 8 + i) + " ")
 
-#Change background colour and draw the net
+# Change background colour and draw the net
 serialPort.write("\033[47m")
 for i in range(0, 5):
-	serialPort.write(ANSIEscape.move_cursor(40, 3 + (i * 4)) + " ")
-	serialPort.write(ANSIEscape.move_cursor(40, 4 + (i * 4)) + " ")
+    serialPort.write(ANSIEscape.set_cursor_position(40, 3 + (i * 4)) + " ")
+    serialPort.write(ANSIEscape.set_cursor_position(40, 4 + (i * 4)) + " ")
 
-#Draw player 1's score
+# Draw player 1's score
 serialPort.write(ANSIEscape.get_numerical_text(0, 0))
 serialPort.write(ANSIEscape.get_numerical_text(0, 1))

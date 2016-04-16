@@ -25,7 +25,7 @@ class TestANSIEscape(TestCase):
         """
         .move_cursor should return the sequence for moving the cursor when it is given no args
         """
-        code = escape.move_cursor()
+        code = escape.set_cursor_position()
         self.assertEqual(code, "\033[0;0H")
 
     def test_move_cursor_args(self):
@@ -34,7 +34,7 @@ class TestANSIEscape(TestCase):
         """
         x = 12
         y = 8
-        code = escape.move_cursor(x, y)
+        code = escape.set_cursor_position(x, y)
         self.assertEqual(code, "\033[{};{}H".format(y, x))
 
     def test_move_cursor_illegal_args(self):
@@ -42,13 +42,13 @@ class TestANSIEscape(TestCase):
         .move_cursor should raise an exception if the args given to it are illegal, eg. out of range
         """
         with self.assertRaises(ValueError):
-            escape.move_cursor(120, 90)
-            escape.move_cursor(-1, 0)
-            escape.move_cursor(0, 180)
+            escape.set_cursor_position(120, 90)
+            escape.set_cursor_position(-1, 0)
+            escape.set_cursor_position(0, 180)
 
         with self.assertRaises(TypeError):
-            escape.move_cursor(0.5, 2)
-            escape.move_cursor("0", "2")
+            escape.set_cursor_position(0.5, 2)
+            escape.set_cursor_position("0", "2")
 
     def test_set_graphics(self):
         """
