@@ -15,9 +15,9 @@ bat_size = [4, 4]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # Ball position
-ball_position = [1, 1]
+ball_position = [5, 8]
 # Ball motion
-ball_motion = [0, 0]
+ball_motion = [1, 0]
 
 update_freq = float(2) / window_size[0]
 last_time = time.time()
@@ -29,7 +29,8 @@ updates = 0
 # Used when sending commands to the serial port, send to the console if in a dev environment (ie not on a Pi)
 def output(seq):
     if debug:
-        print(repr(seq))
+        pass
+        #print(repr(seq))
     else:
         serialPort.write(seq)
 
@@ -140,6 +141,10 @@ def match():
     while delta >= 1:
         delta -= 1
         updates += 1
+        move_and_draw_ball()
+        check_wall_collision()
+        check_paddle_collision()
+        print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
     if time.time() - timer > 1:
         print("UPS: " + str(updates))
         timer = time.time()
@@ -149,4 +154,4 @@ def match():
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
-    pass
+    match()
