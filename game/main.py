@@ -77,36 +77,41 @@ def match():
         pass
 
 
-# Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
-if not debug:
-    # Open Pi serial port, speed 57600 bits per second
-    serialPort = Serial("/dev/ttyAMA0", 57600)
+# First time set-up of the serial connection and screen
+def init():
+    # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
+    if not debug:
+        # Open Pi serial port, speed 57600 bits per second
+        serialPort = Serial("/dev/ttyAMA0", 57600)
 
-    # Should not need, but just in case
-    if not serialPort.isOpen():
-        serialPort.open()
+        # Should not need, but just in case
+        if not serialPort.isOpen():
+            serialPort.open()
 
-# Initial clear of the screen
-output(ANSIEscape.clear_screen())
-output(ANSIEscape.reset_cursor())
+    # Initial clear of the screen
+    output(ANSIEscape.clear_screen())
+    output(ANSIEscape.reset_cursor())
 
-# Set the background colour
-output("\033[42m")
+    # Set the background colour
+    output("\033[42m")
 
-# Draw the background colour
-for i in range(0, window_size[1]):
-    output(" " * window_size[0])
+    # Draw the background colour
+    for i in range(0, window_size[1]):
+        output(" " * window_size[0])
 
-# Draw bats for player 1 and 2
-output(ANSIEscape.draw_bat(3, bat_position[0]))
-output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1]))
+    # Draw bats for player 1 and 2
+    output(ANSIEscape.draw_bat(3, bat_position[0]))
+    output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1]))
 
-# Change background colour and draw the net
-output("\033[47m")
-for i in range(0, window_size[1] / 4):
-    output(ANSIEscape.set_cursor_position(window_size[0] / 2, 3 + (i * 4)) + " ")
-    output(ANSIEscape.set_cursor_position(window_size[0] / 2, 4 + (i * 4)) + " ")
+    # Change background colour and draw the net
+    output("\033[47m")
+    for i in range(0, window_size[1] / 4):
+        output(ANSIEscape.set_cursor_position(window_size[0] / 2, 3 + (i * 4)) + " ")
+        output(ANSIEscape.set_cursor_position(window_size[0] / 2, 4 + (i * 4)) + " ")
 
-# Draw score for Player 0 and 1
-output(ANSIEscape.get_numerical_text(score[0], 0))
-output(ANSIEscape.get_numerical_text(score[1], 1))
+    # Draw score for Player 0 and 1
+    output(ANSIEscape.get_numerical_text(score[0], 0))
+    output(ANSIEscape.get_numerical_text(score[1], 1))
+
+
+init()
