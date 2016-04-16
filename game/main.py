@@ -1,5 +1,6 @@
 from serial import Serial
 from services import ANSIEscape
+import time
 
 debug = True
 
@@ -110,3 +111,22 @@ for i in range(0, window_size[1] / 4):
 # Draw score for Player 0 and 1
 output(ANSIEscape.get_numerical_text(score[0], 0))
 output(ANSIEscape.get_numerical_text(score[1], 1))
+
+update_freq = float(2) / window_size[0]
+last_time = time.time()
+timer = time.time()
+delta = 0
+updates = 0
+
+# Main game loop, keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
+while score[0] < 10 and score[1] < 10:
+    now = time.time()
+    delta += (now - last_time) / update_freq
+    last_time = now
+    while delta >= 1:
+        delta -= 1
+        updates += 1
+    if time.time() - timer > 1:
+        print("UPS: " + str(updates))
+        timer = time.time()
+        updates = 0
