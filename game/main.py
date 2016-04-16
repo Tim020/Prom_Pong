@@ -1,39 +1,52 @@
 from serial import Serial
 from services import ANSIEscape
 
-# Open Pi serial port, speed 9600 bits per second
-serialPort = Serial("/dev/ttyAMA0", 57600)
+debug = True
 
-# Should not need, but just in case
-if not serialPort.isOpen():
-    serialPort.open()
+# Number of serves each player has
+serves = [5, 5]
+# Current score of each player
+score = [0, 0]
+# Top position of the bat for each player
+position = [3, 78]
+
+
+def output(seq):
+    if debug:
+        print(repr(seq))
+    else:
+        serialPort.write(seq)
+
+
+if not debug:
+    # Open Pi serial port, speed 9600 bits per second
+    serialPort = Serial("/dev/ttyAMA0", 57600)
+    
+    # Should not need, but just in case
+    if not serialPort.isOpen():
+        serialPort.open()
 
 # Initial clear of the screen
-serialPort.write(ANSIEscape.clear_screen())
-serialPort.write(ANSIEscape.reset_cursor())
+output(ANSIEscape.clear_screen())
+output(ANSIEscape.reset_cursor())
 
 # Set the background colour
-serialPort.write("\033[42m")
+output("\033[42m")
 
 # Draw the background colour
 for i in range(0, 20):
-    serialPort.write(" " * 80)
+    output(" " * 80)
 
-# Change background color and draw bat 1
-serialPort.write("\033[40m")
-for i in range(0, 4):
-    serialPort.write(ANSIEscape.set_cursor_position(3, 8 + i) + " ")
-
-# Draw bat 2
-for i in range(0, 4):
-    serialPort.write(ANSIEscape.set_cursor_position(78, 8 + i) + " ")
+# Draw bats for player 1 and 2
+output(ANSIEscape.draw_bat(position[0], 8))
+output(ANSIEscape.draw_bat(position[1], 8))
 
 # Change background colour and draw the net
-serialPort.write("\033[47m")
+output("\033[47m")
 for i in range(0, 5):
-    serialPort.write(ANSIEscape.set_cursor_position(40, 3 + (i * 4)) + " ")
-    serialPort.write(ANSIEscape.set_cursor_position(40, 4 + (i * 4)) + " ")
+    output(ANSIEscape.set_cursor_position(40, 3 + (i * 4)) + " ")
+    output(ANSIEscape.set_cursor_position(40, 4 + (i * 4)) + " ")
 
-# Draw player 1's score
-serialPort.write(ANSIEscape.get_numerical_text(0, 0))
-serialPort.write(ANSIEscape.get_numerical_text(0, 1))
+# Draw score for Player 1 and 2
+output(ANSIEscape.get_numerical_text(score[0], 0))
+output(ANSIEscape.get_numerical_text(score[1], 1))

@@ -16,6 +16,14 @@ class ANSIEscape:
         pass
 
     @staticmethod
+    def draw_bat(start_x, start_y):
+        # Set the background colour to be black
+        ret_seq = "\033[40m"
+        for i in range(0, 4):
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
+        return ret_seq
+
+    @staticmethod
     def get_numerical_text(number, player):
         # Determine the start position for the number based on which player it is for
         if player == 0:
