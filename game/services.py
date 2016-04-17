@@ -167,13 +167,13 @@ class ButtonListener:
         self.cb = cb
         self._debounce = debounce
         if self._debounce:
-            pass
+            self._no_db_check_routine()
         else:
             self._no_db_check_routine()
 
     def _start_cooldown(self):
         self._cooling_down = True
-        threading.Timer(0.5, self._cooled_down())
+        threading.Timer(0.5, self._cooled_down).start()
 
     def _cooled_down(self):
         self._cooling_down -= False
@@ -182,3 +182,7 @@ class ButtonListener:
         if self._getter is True and not self._cooling_down:
             self._start_cooldown()
             self.cb()
+        threading.Timer(0.20, self._no_db_check_routine).start()
+
+    def _check_routine(self):
+        pass
