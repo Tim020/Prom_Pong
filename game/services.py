@@ -1,3 +1,5 @@
+import threading
+
 class ANSIEscape:
     @staticmethod
     def reset_cursor():
@@ -152,10 +154,11 @@ class ButtonListener:
     _getter = None
     cb = None
     _debounce = True
+    _cooling_down = False
 
     def __init__(self, getter, cb, debounce=True):
         """
-        Creates a new button listener
+        Creates a new button listener, has a half second cool down
         :param getter: a getter function for the button you want to watch
         :param cb: a callback function to execute when the button is pressed
         :param debounce: should the button listener perform a software debounce?
@@ -163,3 +166,19 @@ class ButtonListener:
         self._getter = getter
         self.cb = cb
         self._debounce = debounce
+        if self._debounce:
+            pass
+        else:
+            self._no_db_check_routine()
+
+    def _start_cooldown(self):
+        self._cooling_down = True
+        threading.Timer(0.5, self._cooled_down())
+
+    def _cooled_down(self):
+        self._cooling_down -= False
+
+    def _no_db_check_routine(self):
+        if self._getter is True and not self._cooling_down:
+            self._start_cooldown()
+            self.cb()
