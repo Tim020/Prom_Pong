@@ -1,6 +1,7 @@
 from serial import Serial
 from services import ANSIEscape
 import time
+import smbus
 
 debug = True
 
@@ -18,6 +19,8 @@ bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0
 ball_position = [5, 8]
 # Ball motion
 ball_motion = [1, 0]
+# Which player has the serve?
+player_serve = 0
 
 update_freq = float(2) / window_size[0]
 last_time = time.time()
@@ -30,7 +33,7 @@ updates = 0
 def output(seq):
     if debug:
         pass
-        #print(repr(seq))
+        # print(repr(seq))
     else:
         serialPort.write(seq)
 
@@ -41,7 +44,11 @@ def move_and_draw_ball():
     global ball_motion
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
-    output("\033[42m")
+    # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
+    if ball_position[0] == window_size[0] / 2:
+        output("\033[47m")
+    else:
+        output("\033[42m")
     output(" ")
     # Then update the ball position
     ball_position[0] += ball_motion[0]
@@ -149,9 +156,17 @@ def match():
         print("UPS: " + str(updates))
         timer = time.time()
         updates = 0
+    # Check for controller move updates here
 
 
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
+    # Check for button press to serve here
+    serves[player_serve] -= 1
     match()
+    if serves[player_serve] == 0:
+        if player_serve == 0:
+            player_serve = 1
+        else:
+            player_serve = 0
