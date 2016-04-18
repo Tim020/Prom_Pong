@@ -6,7 +6,7 @@ escape = ANSIEscape()
 
 
 def _getter():
-    return "This is the getter"
+    return 0
 
 
 def _callback():
@@ -26,7 +26,7 @@ class TestANSIEscape(TestCase):
         .move_cursor should return the sequence for moving the cursor when it is given no args
         """
         code = escape.set_cursor_position()
-        self.assertEqual(code, "\033[0;0H")
+        self.assertEqual(code, "\033[0;0f")
 
     def test_move_cursor_args(self):
         """
@@ -35,7 +35,7 @@ class TestANSIEscape(TestCase):
         x = 12
         y = 8
         code = escape.set_cursor_position(x, y)
-        self.assertEqual(code, "\033[{};{}H".format(y, x))
+        self.assertEqual(code, "\033[{};{}f".format(y, x))
 
     def test_move_cursor_illegal_args(self):
         """
@@ -50,29 +50,6 @@ class TestANSIEscape(TestCase):
             escape.set_cursor_position(0.5, 2)
             escape.set_cursor_position("0", "2")
 
-    def test_set_graphics(self):
-        """
-        .set_graphics should return the sequence to change the settings given in the args
-        """
-        attr = 8
-        fore = 30
-        back = 40
-        code = escape.set_graphics(attr, fore, back)
-        self.assertEqual(code, "\033[{};{};{}m".format(attr, fore, back))
-
-    def test_set_graphics_illegal_args(self):
-        """
-        .set_graphics should raise an exception if the args given to it are illegal
-        """
-        with self.assertRaises(ValueError):
-            escape.set_graphics(3, 30, 40)
-            escape.set_graphics(0, -4, 47)
-            escape.set_graphics(0, 33, 50)
-
-        with self.assertRaises(TypeError):
-            escape.set_graphics("0", "30", 47)
-            escape.set_graphics(0.0, 30.1, 47.0)
-
 
 class TestButtonListenerDebounce(TestCase):
     button = ButtonListener(_getter, _callback)
@@ -85,3 +62,8 @@ class TestButtonListenerDebounce(TestCase):
 
 class TestButtonListenerNoDebounce(TestCase):
     button = ButtonListener(_getter, _callback, False)
+
+    def test_constructor(self):
+        self.assertEqual(self.button.cb(), _callback())
+        self.assertEqual(self.button._getter(), _getter())
+        self.assertFalse(self.button._debounce)
