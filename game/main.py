@@ -29,6 +29,7 @@ timer = time.time()
 delta = 0
 updates = 0
 pyglow = PyGlow()
+I2CADDRESS = 0x21
 
 
 # Used when sending commands to the serial port, send to the console if in a dev environment (ie not on a Pi)
@@ -110,6 +111,9 @@ if not debug:
     # Should not need, but just in case
     if not serialPort.isOpen():
         serialPort.open()
+
+    bus = smbus.SMBus(1)
+    bus.writeByte(I2CADDRESS, 0x20)    
 
 # Initial clear of the screen
 output(ANSIEscape.clear_screen())
