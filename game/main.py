@@ -1,8 +1,10 @@
 from serial import Serial
 from services import ANSIEscape
+from PyGlow import PyGlow
 import time
+import smbus
 
-debug = True
+debug = False
 
 # Size of the window
 window_size = [80, 20]
@@ -18,19 +20,22 @@ bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0
 ball_position = [5, 8]
 # Ball motion
 ball_motion = [1, 0]
+# Which player has the serve?
+player_serve = 0
 
 update_freq = float(2) / window_size[0]
 last_time = time.time()
 timer = time.time()
 delta = 0
 updates = 0
+pyglow = PyGlow()
 
 
 # Used when sending commands to the serial port, send to the console if in a dev environment (ie not on a Pi)
 def output(seq):
     if debug:
         pass
-        #print(repr(seq))
+        # print(repr(seq))
     else:
         serialPort.write(seq)
 
@@ -41,7 +46,11 @@ def move_and_draw_ball():
     global ball_motion
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
-    output("\033[42m")
+    # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
+    if ball_position[0] == window_size[0] / 2:
+        output("\033[47m")
+    else:
+        output("\033[42m")
     output(" ")
     # Then update the ball position
     ball_position[0] += ball_motion[0]
@@ -71,7 +80,7 @@ def check_paddle_collision():
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
             ball_motion[0] *= -1
-    elif ball_position[0] == window_size[1] - 3:
+    elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
 
@@ -149,9 +158,17 @@ def match():
         print("UPS: " + str(updates))
         timer = time.time()
         updates = 0
+    # Check for controller move updates here
 
 
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
+    # Check for button press to serve here
+    serves[player_serve] -= 1
     match()
+    if serves[player_serve] == 0:
+        if player_serve == 0:
+            player_serve = 1
+        else:
+            player_serve = 0

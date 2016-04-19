@@ -193,7 +193,3 @@ class ButtonListener:
             self._db_time_left = 10
 
         threading.Timer(self._polling_rate, self._check_routine).start()
-
-
-
-
