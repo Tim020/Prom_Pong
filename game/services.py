@@ -151,6 +151,25 @@ class ANSIEscape:
         return ret_seq
 
 
+class I2C:
+    @staticmethod
+    def endian_swap(raw):
+        """
+        16 bit endian swap
+        :param raw: Raw 16 bit input (low:high)
+        :return: Endian swap (high:low)
+        """
+        low = raw & 0x00FF
+        high = raw & 0xFF00
+        high >>= 8
+        low <<= 8
+        return low | high
+
+    @staticmethod
+    def mask_high(raw):
+        return raw & 0xF000
+
+
 class ButtonListener:
     _getter = None
     cb = None

@@ -1,10 +1,10 @@
 from serial import Serial
-from services import ANSIEscape
-from PyGlow import PyGlow
+from services import ANSIEscape, I2C
+# from PyGlow import PyGlow
 import time
-import smbus
+# import smbus
 
-debug = False
+debug = True
 
 # Size of the window
 window_size = [80, 20]
@@ -28,7 +28,6 @@ last_time = time.time()
 timer = time.time()
 delta = 0
 updates = 0
-pyglow = PyGlow()
 I2CADDRESS = 0x21
 
 
@@ -112,8 +111,8 @@ if not debug:
     if not serialPort.isOpen():
         serialPort.open()
 
-    bus = smbus.SMBus(1)
-    bus.writeByte(I2CADDRESS, 0x20)    
+        # bus = smbus.SMBus(1)
+        # pyglow = PyGlow()
 
 # Initial clear of the screen
 output(ANSIEscape.clear_screen())
@@ -162,7 +161,7 @@ def match():
         print("UPS: " + str(updates))
         timer = time.time()
         updates = 0
-    # Check for controller move updates here
+        # Check for controller move updates here
 
 
 # Main game loop:
