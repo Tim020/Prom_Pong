@@ -156,10 +156,10 @@ class ButtonListener:
     cb = None
     _debounce = True
     _cooling_down = False
-    _polling_rate = 0.2
-    _db_time_left = 10
+    _polling_rate = 0.02
+    _db_time_left = 5
 
-    def __init__(self, getter, cb, debounce=True, polling_rate=0.2):
+    def __init__(self, getter, cb, debounce=True, polling_rate=0.02):
         """
         Creates a new button listener, has a half second cool down
         :param getter: a getter function for the button you want to watch
@@ -179,17 +179,19 @@ class ButtonListener:
     def _no_db_check_routine(self):
         if self._getter():
             self.cb()
-
         threading.Timer(self._polling_rate, self._no_db_check_routine).start()
 
     def _check_routine(self):
         pressed = self._getter()
         if pressed and self._db_time_left > 0:
             self._db_time_left -= 1
+            threading.Timer(0.02, self._check_routine).start()
+
         elif pressed and self._db_time_left <= 0:
             self._db_time_left = 10
             self.cb()
+            threading.Timer(self._polling_rate, self._check_routine).start()
+
         else:
             self._db_time_left = 10
-
-        threading.Timer(self._polling_rate, self._check_routine).start()
+            threading.Timer(self._polling_rate, self._check_routine).start()

@@ -26,7 +26,7 @@ class TestANSIEscape(TestCase):
         .move_cursor should return the sequence for moving the cursor when it is given no args
         """
         code = escape.set_cursor_position()
-        self.assertEqual(code, "\033[0;0f")
+        self.assertEqual(code, "\033[1;1f")
 
     def test_move_cursor_args(self):
         """
@@ -58,7 +58,6 @@ class TestButtonListenerDebounce(TestCase):
         self.assertEqual(self.button.cb(), _callback())
         self.assertEqual(self.button._getter(), _getter())
         self.assertTrue(self.button._debounce)
-
 
 class TestButtonListenerNoDebounce(TestCase):
     button = ButtonListener(_getter, _callback, False)
