@@ -78,7 +78,7 @@ def check_paddle_collision():
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
             ball_motion[0] *= -1
-    elif ball_position[0] == window_size[1] - 3:
+    elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
 
