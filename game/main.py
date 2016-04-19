@@ -1,9 +1,10 @@
 from serial import Serial
 from services import ANSIEscape
+from PyGlow import PyGlow
 import time
 import smbus
 
-debug = True
+debug = False
 
 # Size of the window
 window_size = [80, 20]
@@ -27,6 +28,7 @@ last_time = time.time()
 timer = time.time()
 delta = 0
 updates = 0
+pyglow = PyGlow()
 
 
 # Used when sending commands to the serial port, send to the console if in a dev environment (ie not on a Pi)
