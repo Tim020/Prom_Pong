@@ -3,6 +3,7 @@ from services import ANSIEscape, I2C
 # from PyGlow import PyGlow
 import time
 # import smbus
+import random
 
 debug = True
 
@@ -80,9 +81,11 @@ def check_paddle_collision():
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
             ball_motion[0] *= -1
+            ball_motion[1] = random.randrange(-1, 1)
     elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
+            ball_motion[1] = random.randrange(-1, 1)
 
 
 # Check if a point has been scored, returns true if there has
@@ -114,9 +117,10 @@ if not debug:
         # bus = smbus.SMBus(1)
         # pyglow = PyGlow()
 
-# Initial clear of the screen
+# Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
 output(ANSIEscape.reset_cursor())
+output("\033[?25l")
 
 # Set the background colour
 output("\033[42m")
@@ -147,30 +151,36 @@ def match():
     global last_time
     global updates
     global timer
-    now = time.time()
-    delta += (now - last_time) / update_freq
-    last_time = now
-    while delta >= 1:
-        delta -= 1
-        updates += 1
-        move_and_draw_ball()
-        check_wall_collision()
-        check_paddle_collision()
-        print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
-    if time.time() - timer > 1:
-        print("UPS: " + str(updates))
-        timer = time.time()
-        updates = 0
+    while not check_point_scored():
+        now = time.time()
+        delta += (now - last_time) / update_freq
+        last_time = now
+        while delta >= 1:
+            delta -= 1
+            updates += 1
+            move_and_draw_ball()
+            check_wall_collision()
+            check_paddle_collision()
+            print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
+        if time.time() - timer > 1:
+            print("UPS: " + str(updates))
+            timer = time.time()
+            updates = 0
         # Check for controller move updates here
+        if False:
+            pass
 
 
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
-    # Check for button press to serve here
+    # Check for button press to serve here, wait if not (wait for input interrupt?)
+    if False:
+        pass
     serves[player_serve] -= 1
     match()
     if serves[player_serve] == 0:
+        serves[player_serve] = 5
         if player_serve == 0:
             player_serve = 1
         else:
