@@ -5,7 +5,7 @@ import time
 # import smbus
 import random
 
-debug = True
+debug = False
 
 # Size of the window
 window_size = [80, 20]
@@ -25,7 +25,7 @@ ball_motion = [1, 0]
 player_serve = 0
 net_pos = []
 
-update_freq = float(2) / window_size[0]
+update_freq = float(10) / window_size[0]
 last_time = time.time()
 timer = time.time()
 delta = 0
