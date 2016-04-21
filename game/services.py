@@ -207,10 +207,10 @@ class ButtonListener:
             threading.Timer(0.02, self._check_routine).start()
 
         elif pressed and self._db_time_left <= 0:
-            self._db_time_left = 10
+            self._db_time_left = 5
             self.cb()
             threading.Timer(self._polling_rate, self._check_routine).start()
 
         else:
-            self._db_time_left = 10
+            self._db_time_left = 5
             threading.Timer(self._polling_rate, self._check_routine).start()
