@@ -1,8 +1,8 @@
 from serial import Serial
 from services import ANSIEscape, I2C
-# from PyGlow import PyGlow
+from PyGlow import PyGlow
 import time
-# import smbus
+import smbus
 import random
 
 debug = False
@@ -124,9 +124,8 @@ if not debug:
     # Should not need, but just in case
     if not serialPort.isOpen():
         serialPort.open()
-
-        # bus = smbus.SMBus(1)
-        # pyglow = PyGlow()
+    bus = smbus.SMBus(1)
+    pyglow = PyGlow()
 
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
@@ -155,6 +154,7 @@ for i in range(0, window_size[1] / 4):
 # Draw score for Player 0 and 1
 print_score()
 
+pyglow.all(0)
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -192,7 +192,6 @@ def match():
         if False:
             pass
 
-
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
@@ -201,11 +200,20 @@ while score[0] < 10 and score[1] < 10:
         pass
     serves[player_serve] -= 1
     match()
-    #Re-draw the scores
+    # Re-draw the scores
     print_score()
+    # PyGlow effects
+    for i in range(1, 7):
+        pyglow.led([i, i+6, i+12], 255)
+        time.sleep(0.5)
+    for i in range(1, 7):
+        pyglow.led([i, i+6, i+12], 0)
+        time.sleep(0.5)
+    pyglow.all(0)
     if serves[player_serve] == 0:
         serves[player_serve] = 5
         if player_serve == 0:
             player_serve = 1
         else:
             player_serve = 0
+    break
