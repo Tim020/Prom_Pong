@@ -4,6 +4,7 @@ from PyGlow import PyGlow
 import time
 import smbus
 import random
+import RPi.GPIO as GPIO
 
 debug = False
 
@@ -23,6 +24,13 @@ ball_position = [5, 8]
 ball_motion = [1, 0]
 # Which player has the serve?
 player_serve = 0
+# How many pixels per LED?
+led_steps = int((window_size[0]) / 8)
+# The GPIO pins associated with the 8 LEDs
+leds = [5, 6, 12, 13, 16, 19, 20, 26]
+# Which LED is currently active
+active_led = 0
+# Stores the positions of the net, used for re-drawing when the ball goes through it
 net_pos = []
 
 update_freq = float(10) / window_size[0]
@@ -58,6 +66,9 @@ def print_score():
 def move_and_draw_ball():
     global ball_position
     global ball_motion
+    global active_led
+    global leds
+    global led_steps
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
@@ -69,6 +80,10 @@ def move_and_draw_ball():
     # Then update the ball position
     ball_position[0] += ball_motion[0]
     ball_position[1] += ball_motion[1]
+    # Update the onboard LED
+    GPIO.output(leds[active_led], False)
+    active_led = ball_position[0]/led_steps
+    GPIO.output(leds[active_led], True)
     # Finally draw the new ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     output("\033[47m")
@@ -99,7 +114,6 @@ def check_paddle_collision():
             ball_motion[0] *= -1
             ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
 
-
 # Check if a point has been scored, returns true if there has
 def check_point_scored():
     global ball_position
@@ -126,6 +140,10 @@ if not debug:
         serialPort.open()
     bus = smbus.SMBus(1)
     pyglow = PyGlow()
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    for i in leds:
+        GPIO.setup(i, GPIO.OUT)
 
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
@@ -154,7 +172,10 @@ for i in range(0, window_size[1] / 4):
 # Draw score for Player 0 and 1
 print_score()
 
+# Reset the PyGlow and on-board LEDs
 pyglow.all(0)
+for i in leds:
+    GPIO.output(i, False)
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -206,7 +227,7 @@ while score[0] < 10 and score[1] < 10:
     for i in range(1, 7):
         pyglow.led([i, i+6, i+12], 255)
         time.sleep(0.5)
-    for i in range(1, 7):
+    for i in range(6, 0, -1):
         pyglow.led([i, i+6, i+12], 0)
         time.sleep(0.5)
     pyglow.all(0)
