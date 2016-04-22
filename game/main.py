@@ -41,6 +41,18 @@ def output(seq):
     else:
         serialPort.write(seq)
 
+# Undraw and re-draw the players scores
+def print_score():
+    global score
+    output("\033[42m")
+    for y in range(0, 5):
+        output(ANSIEscape.set_cursor_position(29, 2 + y))
+        output(" " * 3)
+    for y in range(0, 5):
+        output(ANSIEscape.set_cursor_position(48, 2 + y))
+        output(" " * 3)
+    output(ANSIEscape.get_numerical_text(score[0], 0))
+    output(ANSIEscape.get_numerical_text(score[1], 1))
 
 # Move the ball by motion and re-draws it
 def move_and_draw_ball():
@@ -72,7 +84,6 @@ def check_wall_collision():
     if ball_position[1] == 1 or ball_position[1] == window_size[1]:
         ball_motion[1] *= -1
 
-
 # Checks if the ball has hit a paddle and updates the motion as appropriate
 def check_paddle_collision():
     global ball_position
@@ -82,11 +93,11 @@ def check_paddle_collision():
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
             ball_motion[0] *= -1
-            ball_motion[1] = random.randrange(-1, 1)
+            ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
     elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
-            ball_motion[1] = random.randrange(-1, 1)
+            ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
 
 
 # Check if a point has been scored, returns true if there has
@@ -99,12 +110,11 @@ def check_point_scored():
         if ball_position[1] < bat_position[0] or ball_position[1] > bat_position[0] + bat_size[0]:
             score[1] += 1
             return True
-    elif ball_position[0] == window_size[1] - 3:
+    elif ball_position[0] == window_size[0] - 3:
         if ball_position[1] < bat_position[1] or ball_position[1] > bat_position[1] + bat_size[1]:
             score[0] += 1
             return True
     return False
-
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
@@ -143,8 +153,7 @@ for i in range(0, window_size[1] / 4):
     net_pos.append(4 + (i * 4))
 
 # Draw score for Player 0 and 1
-output(ANSIEscape.get_numerical_text(score[0], 0))
-output(ANSIEscape.get_numerical_text(score[1], 1))
+print_score()
 
 
 # Main loop for a single match (until a point is scored)
@@ -161,9 +170,19 @@ def match():
         while delta >= 1:
             delta -= 1
             updates += 1
+            # Check if the ball is inside the scores and re-draw if necessary
+            print_score_check = False
+            if ball_position[0] >= 29 and ball_position[0] <= 31:
+                if ball_position[1] >= 2 and ball_position[1] <= 7:
+                    print_score_check = True
+            elif ball_position[0] >= 48 and ball_position[0] <= 50:
+                if ball_position[1] >= 2 and ball_position[1] <= 7:
+                    print_score_check = True
             move_and_draw_ball()
             check_wall_collision()
             check_paddle_collision()
+            if print_score_check:
+                print_score()
             print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
         if time.time() - timer > 1:
             print("UPS: " + str(updates))
@@ -182,6 +201,8 @@ while score[0] < 10 and score[1] < 10:
         pass
     serves[player_serve] -= 1
     match()
+    #Re-draw the scores
+    print_score()
     if serves[player_serve] == 0:
         serves[player_serve] = 5
         if player_serve == 0:

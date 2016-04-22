@@ -167,7 +167,7 @@ class I2C:
 
     @staticmethod
     def mask_high(raw):
-        return raw & 0xF000
+        return raw & 0x0FFF
 
 
 class ButtonListener:
