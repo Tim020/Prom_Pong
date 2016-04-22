@@ -9,7 +9,7 @@ import RPi.GPIO as GPIO
 debug = False
 
 # Size of the window
-window_size = [80, 20]
+window_size = [80, 40]
 # Number of serves each player has
 serves = [5, 5]
 # Current score of each player
@@ -19,7 +19,7 @@ bat_size = [4, 4]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # Ball position
-ball_position = [5, 8]
+ball_position = [4, window_size[1]/2]
 # Ball motion
 ball_motion = [1, 0]
 # Which player has the serve?
@@ -229,7 +229,7 @@ while score[0] < 10 and score[1] < 10:
         time.sleep(0.5)
     for i in range(6, 0, -1):
         pyglow.led([i, i+6, i+12], 0)
-        time.sleep(0.5)
+        time.sleep(0.5) 
     pyglow.all(0)
     if serves[player_serve] == 0:
         serves[player_serve] = 5
