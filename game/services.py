@@ -1,4 +1,5 @@
 import threading
+import smbus
 
 
 class ANSIEscape:
@@ -152,6 +153,9 @@ class ANSIEscape:
 
 
 class I2C:
+    ADC_ADDRESS = 0x21
+    bus = smbus.SMBus(1)
+
     @staticmethod
     def endian_swap(raw):
         """
@@ -167,7 +171,35 @@ class I2C:
 
     @staticmethod
     def mask_high(raw):
-        return raw & 0xF000
+        return raw & 0x0FFF
+
+    def get_adc_value(self, channel):
+        """
+        get the value of the the adc on a given channel
+        :param channel: 1, 2, 3, or 4
+        :return: the value as int
+        """
+        if channel == 1:
+            command = 0x10
+        elif channel == 2:
+            command = 0x20
+        elif channel == 3:
+            command = 0x40
+        elif channel == 4:
+            command = 0x80
+        else:
+            raise ValueError("channel must be 1, 2, 3, or 4")
+
+        # Tell the ADC to convert a specific channel
+        self.bus.write_byte(self.ADC_ADDRESS, command)
+
+        # Get the conversion (read always gets most recent conversion)
+        data = self.bus.read_word_data(self.ADC_ADDRESS, 0x00)
+
+        # Process the data
+        data = self.endian_swap(data)
+        data = self.mask_high(data)
+        return data
 
 
 class ButtonListener:
