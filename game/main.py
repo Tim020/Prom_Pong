@@ -58,6 +58,7 @@ def output(seq):
 def update_bat_pos(player):
     """
     Update the bat positions for both players
+    :param player: 0 or 1 for player 1 or 2 respectively
     """
     global voltage_range
     global window_size
