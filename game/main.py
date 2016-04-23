@@ -1,14 +1,15 @@
 from serial import Serial
 from services import ANSIEscape, I2C
-# from PyGlow import PyGlow
+from PyGlow import PyGlow
 import time
-# import smbus
+import smbus
 import random
+import RPi.GPIO as GPIO
 
 debug = False
 
 # Size of the window
-window_size = [80, 20]
+window_size = [80, 40]
 # Number of serves each player has
 serves = [5, 5]
 # Current score of each player
@@ -18,11 +19,18 @@ bat_size = [4, 4]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # Ball position
-ball_position = [5, 8]
+ball_position = [4, window_size[1]/2]
 # Ball motion
 ball_motion = [1, 0]
 # Which player has the serve?
 player_serve = 0
+# How many pixels per LED?
+led_steps = int((window_size[0]) / 8)
+# The GPIO pins associated with the 8 LEDs
+leds = [5, 6, 12, 13, 16, 19, 20, 26]
+# Which LED is currently active
+active_led = 0
+# Stores the positions of the net, used for re-drawing when the ball goes through it
 net_pos = []
 
 update_freq = float(10) / window_size[0]
@@ -41,11 +49,26 @@ def output(seq):
     else:
         serialPort.write(seq)
 
+# Undraw and re-draw the players scores
+def print_score():
+    global score
+    output("\033[42m")
+    for y in range(0, 5):
+        output(ANSIEscape.set_cursor_position(29, 2 + y))
+        output(" " * 3)
+    for y in range(0, 5):
+        output(ANSIEscape.set_cursor_position(48, 2 + y))
+        output(" " * 3)
+    output(ANSIEscape.get_numerical_text(score[0], 0))
+    output(ANSIEscape.get_numerical_text(score[1], 1))
 
 # Move the ball by motion and re-draws it
 def move_and_draw_ball():
     global ball_position
     global ball_motion
+    global active_led
+    global leds
+    global led_steps
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
@@ -57,6 +80,10 @@ def move_and_draw_ball():
     # Then update the ball position
     ball_position[0] += ball_motion[0]
     ball_position[1] += ball_motion[1]
+    # Update the onboard LED
+    GPIO.output(leds[active_led], False)
+    active_led = ball_position[0]/led_steps
+    GPIO.output(leds[active_led], True)
     # Finally draw the new ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     output("\033[47m")
@@ -72,7 +99,6 @@ def check_wall_collision():
     if ball_position[1] == 1 or ball_position[1] == window_size[1]:
         ball_motion[1] *= -1
 
-
 # Checks if the ball has hit a paddle and updates the motion as appropriate
 def check_paddle_collision():
     global ball_position
@@ -82,12 +108,11 @@ def check_paddle_collision():
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
             ball_motion[0] *= -1
-            ball_motion[1] = random.randrange(-1, 1)
+            ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
     elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
-            ball_motion[1] = random.randrange(-1, 1)
-
+            ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
 
 # Check if a point has been scored, returns true if there has
 def check_point_scored():
@@ -99,12 +124,11 @@ def check_point_scored():
         if ball_position[1] < bat_position[0] or ball_position[1] > bat_position[0] + bat_size[0]:
             score[1] += 1
             return True
-    elif ball_position[0] == window_size[1] - 3:
+    elif ball_position[0] == window_size[0] - 3:
         if ball_position[1] < bat_position[1] or ball_position[1] > bat_position[1] + bat_size[1]:
             score[0] += 1
             return True
     return False
-
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
@@ -114,9 +138,12 @@ if not debug:
     # Should not need, but just in case
     if not serialPort.isOpen():
         serialPort.open()
-
-        # bus = smbus.SMBus(1)
-        # pyglow = PyGlow()
+    bus = smbus.SMBus(1)
+    pyglow = PyGlow()
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    for i in leds:
+        GPIO.setup(i, GPIO.OUT)
 
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
@@ -143,9 +170,12 @@ for i in range(0, window_size[1] / 4):
     net_pos.append(4 + (i * 4))
 
 # Draw score for Player 0 and 1
-output(ANSIEscape.get_numerical_text(score[0], 0))
-output(ANSIEscape.get_numerical_text(score[1], 1))
+print_score()
 
+# Reset the PyGlow and on-board LEDs
+pyglow.all(0)
+for i in leds:
+    GPIO.output(i, False)
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -161,9 +191,19 @@ def match():
         while delta >= 1:
             delta -= 1
             updates += 1
+            # Check if the ball is inside the scores and re-draw if necessary
+            print_score_check = False
+            if ball_position[0] >= 29 and ball_position[0] <= 31:
+                if ball_position[1] >= 2 and ball_position[1] <= 7:
+                    print_score_check = True
+            elif ball_position[0] >= 48 and ball_position[0] <= 50:
+                if ball_position[1] >= 2 and ball_position[1] <= 7:
+                    print_score_check = True
             move_and_draw_ball()
             check_wall_collision()
             check_paddle_collision()
+            if print_score_check:
+                print_score()
             print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
         if time.time() - timer > 1:
             print("UPS: " + str(updates))
@@ -173,7 +213,6 @@ def match():
         if False:
             pass
 
-
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
@@ -182,9 +221,20 @@ while score[0] < 10 and score[1] < 10:
         pass
     serves[player_serve] -= 1
     match()
+    # Re-draw the scores
+    print_score()
+    # PyGlow effects
+    for i in range(1, 7):
+        pyglow.led([i, i+6, i+12], 255)
+        time.sleep(0.5)
+    for i in range(6, 0, -1):
+        pyglow.led([i, i+6, i+12], 0)
+        time.sleep(0.5) 
+    pyglow.all(0)
     if serves[player_serve] == 0:
         serves[player_serve] = 5
         if player_serve == 0:
             player_serve = 1
         else:
             player_serve = 0
+    break
