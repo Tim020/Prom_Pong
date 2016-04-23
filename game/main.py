@@ -49,6 +49,7 @@ def output(seq):
     else:
         serialPort.write(seq)
 
+
 # Undraw and re-draw the players scores
 def print_score():
     global score
@@ -61,6 +62,7 @@ def print_score():
         output(" " * 3)
     output(ANSIEscape.get_numerical_text(score[0], 0))
     output(ANSIEscape.get_numerical_text(score[1], 1))
+
 
 # Move the ball by motion and re-draws it
 def move_and_draw_ball():
@@ -99,6 +101,7 @@ def check_wall_collision():
     if ball_position[1] == 1 or ball_position[1] == window_size[1]:
         ball_motion[1] *= -1
 
+
 # Checks if the ball has hit a paddle and updates the motion as appropriate
 def check_paddle_collision():
     global ball_position
@@ -113,6 +116,7 @@ def check_paddle_collision():
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
             ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
+
 
 # Check if a point has been scored, returns true if there has
 def check_point_scored():
@@ -176,6 +180,7 @@ print_score()
 pyglow.all(0)
 for i in leds:
     GPIO.output(i, False)
+
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
