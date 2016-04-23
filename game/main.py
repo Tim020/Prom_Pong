@@ -78,7 +78,7 @@ def update_bat_pos(player):
             new_pos = bat_position[player]
 
     # Check whether the bottom of the bat is within the screen, if not move it up
-    bottom_space = window_size[1] - (new_pos + bat_size[0] - 1)
+    bottom_space = window_size[1] - (new_pos + bat_size[player] - 1)
     if bottom_space < 0:
         new_pos += bottom_space
 
