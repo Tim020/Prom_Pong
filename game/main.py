@@ -1,6 +1,7 @@
 from serial import Serial
 from services import ANSIEscape, I2C
 from PyGlow import PyGlow
+from math import ceil
 import time
 import smbus
 import random
@@ -15,9 +16,13 @@ serves = [5, 5]
 # Current score of each player
 score = [0, 0]
 # Size of the player's bats
-bat_size = [4, 4]
+default_bat_size = 4
+bat_size = [default_bat_size, default_bat_size]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
+# How wide the voltage range is for each possible bat_position
+#   2812 Comes from the range of values the ADC can give us between 0.5V and 2.5V
+voltage_range = 2812 / ((window_size[1] - default_bat_size) + 1)
 # Ball position
 ball_position = [4, window_size[1]/2]
 # Ball motion
@@ -38,7 +43,7 @@ last_time = time.time()
 timer = time.time()
 delta = 0
 updates = 0
-I2CADDRESS = 0x21
+i2c = I2C()
 
 
 # Used when sending commands to the serial port, send to the console if in a dev environment (ie not on a Pi)
@@ -48,6 +53,36 @@ def output(seq):
         # print(repr(seq))
     else:
         serialPort.write(seq)
+
+
+def update_bat_pos(player):
+    """
+    Update the bat positions for both players
+    """
+    global voltage_range
+    global window_size
+    global bat_size
+    global bat_position
+    channel = player  # TODO Make this find the right channel for the player when we decide which channels to use
+    player_input = i2c.get_adc_value(channel)
+    new_pos = ceil(player_input / voltage_range)
+
+    # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
+    # Works sort of like a Schmitt trigger
+    if new_pos == bat_position[player] + 1:
+        if player_input > ((new_pos-1) * voltage_range) + (voltage_range / 10):
+            new_pos = bat_position[player]
+    elif new_pos == bat_position[player] - 1:
+        if player_input < (new_pos * voltage_range) - (voltage_range / 10):
+            new_pos = bat_position[player]
+
+    # Check whether the bottom of the bat is within the screen, if not move it up
+    bottom_space = window_size[1] - (new_pos + bat_size[0] - 1)
+    if bottom_space < 0:
+        new_pos += bottom_space
+
+    # Update the position
+    bat_position[player] = new_pos
 
 
 # Undraw and re-draw the players scores
@@ -193,6 +228,8 @@ def match():
         now = time.time()
         delta += (now - last_time) / update_freq
         last_time = now
+        update_bat_pos(0)
+        update_bat_pos(1)
         while delta >= 1:
             delta -= 1
             updates += 1
