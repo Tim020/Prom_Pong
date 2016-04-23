@@ -177,7 +177,7 @@ class I2C:
         """
         get the value of the the adc on a given channel
         :param channel: 1, 2, 3, or 4
-        :return: the value as int
+        :return: the value as int, between 0 and 2812=(3416 - 604)
         """
         if channel == 1:
             command = 0x10
@@ -199,6 +199,16 @@ class I2C:
         # Process the data
         data = self.endian_swap(data)
         data = self.mask_high(data)
+        # 604 is the value we got for 0.5V, so subtract this so we can work from 0 rather than 604.
+        data -= 604
+
+        # 2812 is the range in the values the ADC can give us between 0.5V and 2.5V
+        # If were out of the scaled range we specified, set to the max or min value for our range.
+        if data < 0:
+            data = 0
+        elif data > 2812:
+            data = 2812
+
         return data
 
 
