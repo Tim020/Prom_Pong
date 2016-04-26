@@ -26,7 +26,7 @@ voltage_range = 2812 / ((window_size[1] - default_bat_size) + 1)
 # Ball position
 ball_position = [4, window_size[1]/2]
 # Ball motion
-ball_motion = [1, 0]
+ball_motion = [0, 0]
 # Which player has the serve?
 player_serve = 0
 # How many pixels per LED?
@@ -64,7 +64,10 @@ def update_bat_pos(player):
     global window_size
     global bat_size
     global bat_position
-    channel = player  # TODO Make this find the right channel for the player when we decide which channels to use
+    if player == 0:
+        channel = 2
+    elif player == 1:
+        channel = 3
     player_input = i2c.get_adc_value(channel)
     new_pos = ceil(player_input / voltage_range)
 
@@ -83,7 +86,8 @@ def update_bat_pos(player):
         new_pos += bottom_space
 
     # Update the position
-    bat_position[player] = new_pos
+    if new_pos != bat_position[player]:
+        bat_position[player] = new_pos
 
 
 # Undraw and re-draw the players scores
@@ -225,12 +229,24 @@ def match():
     global last_time
     global updates
     global timer
+    global ball_position
+    global bat_position
+    update_bat_pos(0)
+    update_bat_pos(1)
+    if player_serve == 0:
+        ball_position[0] = 4
+    else:
+        ball_position[0] = window_size[0] - 3
+    ball_position[1] = bat_position[player_serve] + 2
+    move_and_draw_ball()
+    print(str(ball_position) + "\n" + str(bat_position))
+    return
     while not check_point_scored():
         now = time.time()
         delta += (now - last_time) / update_freq
         last_time = now
-        update_bat_pos(0)
-        update_bat_pos(1)
+        #update_bat_pos(0)
+        #update_bat_pos(1)
         while delta >= 1:
             delta -= 1
             updates += 1
@@ -252,9 +268,6 @@ def match():
             print("UPS: " + str(updates))
             timer = time.time()
             updates = 0
-        # Check for controller move updates here
-        if False:
-            pass
 
 # Main game loop:
 # Runs while no player has a winning score
