@@ -297,6 +297,13 @@ while score[0] < 10 and score[1] < 10:
         ball_position[1] = bat_position[player_serve] + 2
 
     serves[player_serve] -= 1
+
+    # Set the direction of the ball
+    if player_serve == 0:
+        ball_motion = 1
+    else:
+        ball_motion = -1
+
     match()
 
     # Re-draw the scores
