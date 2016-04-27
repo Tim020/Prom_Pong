@@ -111,6 +111,7 @@ def move_and_draw_ball():
     global leds
     global led_steps
 
+    # TODO Check undraw problem. Is escape code fine?
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
@@ -234,16 +235,6 @@ def match():
     global timer
     global ball_position
     global bat_position
-    update_bat_pos(0)
-    update_bat_pos(1)
-    if player_serve == 0:
-        ball_position[0] = 4
-    else:
-        ball_position[0] = window_size[0] - 3
-    ball_position[1] = bat_position[player_serve] + 2
-    move_and_draw_ball()
-    print(str(ball_position) + "\n" + str(bat_position))
-    return
 
     move_and_draw_ball()  # TODO check if this is breaking stuff by being called here
     while not check_point_scored():
