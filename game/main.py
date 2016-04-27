@@ -65,6 +65,8 @@ def update_bat_pos(player):
         channel = 2
     elif player == 1:
         channel = 3
+    else:
+        raise ValueError("player param must be 0 or 1")
     player_input = i2c.get_adc_value(channel)
     new_pos = ceil(player_input / voltage_range)
 
