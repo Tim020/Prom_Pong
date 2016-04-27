@@ -13,7 +13,7 @@ class ANSIEscape:
 
     @staticmethod
     def set_cursor_position(x=1, y=1):
-        return "\033[" + str(y) + ";" + str(x) + "f"
+        return "\033[{};{}f".format(int(y), int(x))
 
     @staticmethod
     def set_graphics(attr, fore, back):
@@ -23,6 +23,14 @@ class ANSIEscape:
     def draw_bat(start_x, start_y):
         # Set the background colour to be black
         ret_seq = "\033[40m"
+        for i in range(0, 4):
+            ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
+        return ret_seq
+
+    @staticmethod
+    def undraw_bat(start_x, start_y):
+        # Set the background colour to be green
+        ret_seq = "\033[42m"
         for i in range(0, 4):
             ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
         return ret_seq

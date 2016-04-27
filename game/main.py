@@ -62,9 +62,9 @@ def update_bat_pos(player):
     """
     global bat_position
     if player == 0:
-        channel = 2
+        channel = 1
     elif player == 1:
-        channel = 3
+        channel = 2
     else:
         raise ValueError("player param must be 0 or 1")
     player_input = i2c.get_adc_value(channel)
@@ -86,8 +86,23 @@ def update_bat_pos(player):
 
     # Update the position
     if new_pos != bat_position[player]:
+        if player == 0:
+            start_x = 3
+        else:
+            start_x = window_size[0] - 2
+        #output(ANSIEscape.undraw_bat(start_x, bat_position[player]))
+        output("\033[42m")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player]) + " ")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 1) + " ")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 2) + " ")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 3) + " ")
         bat_position[player] = new_pos
-
+        #output(ANSIEscape.draw_bat(start_x, bat_position[player]))
+        output("\033[40m")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player]) + " ")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 1) + " ")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 2) + " ")
+        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 3) + " ")
 
 # Un-draw and re-draw the players scores
 def print_score():
@@ -181,7 +196,7 @@ def check_point_scored():
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
     # Open Pi serial port, speed 57600 bits per second
-    serialPort = Serial("/dev/ttyAMA0", 57600)
+    serialPort = Serial("/dev/ttyAMA0", 115200)
 
     # Should not need, but just in case
     if not serialPort.isOpen():
@@ -192,6 +207,7 @@ if not debug:
     GPIO.setmode(GPIO.BCM)
     for i in leds:
         GPIO.setup(i, GPIO.OUT)
+    GPIO.setup(2, GPIO.IN)
 
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
@@ -236,7 +252,7 @@ def match():
     global ball_position
     global bat_position
 
-    move_and_draw_ball()  # TODO check if this is breaking stuff by being called here
+    move_and_draw_ball()
     while not check_point_scored():
         now = time.time()
         delta += (now - last_time) / update_freq
@@ -265,7 +281,7 @@ def match():
             if print_score_check:
                 print_score()
 
-            print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
+            #print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
 
         if time.time() - timer > 1:
             print("UPS: " + str(updates))
@@ -286,14 +302,15 @@ while score[0] < 10 and score[1] < 10:
         update_bat_pos(1)
         ball_position[1] = bat_position[player_serve] + 2
         # TODO Redraw_ball()
+        # TODO Redraw bats
 
     serves[player_serve] -= 1
 
     # Set the direction of the ball
     if player_serve == 0:
-        ball_motion = 1
+        ball_motion[0] = 1
     else:
-        ball_motion = -1
+        ball_motion[0] = -1
 
     match()
 
