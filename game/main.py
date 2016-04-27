@@ -242,8 +242,8 @@ def match():
         now = time.time()
         delta += (now - last_time) / update_freq
         last_time = now
-        #update_bat_pos(0)
-        #update_bat_pos(1)
+        update_bat_pos(0)
+        update_bat_pos(1)
         while delta >= 1:
             delta -= 1
             updates += 1
