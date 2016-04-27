@@ -75,10 +75,10 @@ def update_bat_pos(player):
     # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
     # Works sort of like a Schmitt trigger
     if new_pos == bat_position[player] + 1:
-        if player_input > ((new_pos-1) * voltage_range) + (voltage_range / 10):
+        if player_input > ((new_pos-1) * voltage_range) + (voltage_range / 8):
             new_pos = bat_position[player]
     elif new_pos == bat_position[player] - 1:
-        if player_input < (new_pos * voltage_range) - (voltage_range / 10):
+        if player_input < (new_pos * voltage_range) - (voltage_range / 8):
             new_pos = bat_position[player]
 
     # Check whether the bottom of the bat is within the screen, if not move it up
