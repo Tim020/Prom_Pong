@@ -226,7 +226,7 @@ class ButtonListener:
     _debounce = True
     _cooling_down = False
     _polling_rate = 0.02
-    _db_time_left = 5
+    _db_time_left = 3
 
     def __init__(self, getter, cb, debounce=True, polling_rate=0.02):
         """
@@ -257,10 +257,10 @@ class ButtonListener:
             threading.Timer(0.02, self._check_routine).start()
 
         elif pressed and self._db_time_left <= 0:
-            self._db_time_left = 5
+            self._db_time_left = 3
             self.cb()
             threading.Timer(self._polling_rate, self._check_routine).start()
 
         else:
-            self._db_time_left = 5
+            self._db_time_left = 3
             threading.Timer(self._polling_rate, self._check_routine).start()

@@ -1,5 +1,5 @@
 from serial import Serial
-from services import ANSIEscape, I2C
+from services import ANSIEscape, I2C, ButtonListener
 from PyGlow import PyGlow
 from math import ceil
 import time
@@ -37,6 +37,8 @@ leds = [5, 6, 12, 13, 16, 19, 20, 26]
 active_led = 0
 # Stores the positions of the net, used for re-drawing when the ball goes through it
 net_pos = []
+# Has the player served?
+serve = False
 
 update_freq = float(10) / window_size[0]
 last_time = time.time()
@@ -193,6 +195,14 @@ def check_point_scored():
             return True
     return False
 
+def get_serve_p1():
+    return not GPIO.input(2)
+
+def set_serve():
+    global serve
+    print("SERVE!")
+    serve = True
+
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
     # Open Pi serial port, speed 57600 bits per second
@@ -241,6 +251,8 @@ pyglow.all(0)
 for i in leds:
     GPIO.output(i, False)
 
+# Set up button listeners for players
+p1_serve = ButtonListener(get_serve_p1, set_serve)
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
