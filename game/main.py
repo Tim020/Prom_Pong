@@ -113,12 +113,11 @@ def move_and_draw_ball():
 
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
-
     # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
     if ball_position[0] == window_size[0] / 2 and ball_position[1] in net_pos:
-        output("\033[47m")
+        output("\033[47m")  # White
     else:
-        output("\033[42m")
+        output("\033[42m")  # Green
     output(" ")
 
     # Update the ball position
