@@ -21,8 +21,8 @@ bat_size = [default_bat_size, default_bat_size]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # How wide the voltage range is for each possible bat_position
-#   2812 Comes from the range of values the ADC can give us between 0.5V and 2.5V
-voltage_range = 2812 / ((window_size[1] - default_bat_size) + 1)
+#   1538 Comes from the range of values the ADC can give us between 0.5V and 2.5V
+voltage_range = 1538 / ((window_size[1] - default_bat_size) + 1)
 # Ball position
 ball_position = [4, window_size[1]/2]
 # Ball motion
@@ -272,7 +272,6 @@ def match():
             timer = time.time()
             updates = 0
 
-
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
@@ -286,6 +285,7 @@ while score[0] < 10 and score[1] < 10:
         update_bat_pos(0)
         update_bat_pos(1)
         ball_position[1] = bat_position[player_serve] + 2
+        # TODO Redraw_ball()
 
     serves[player_serve] -= 1
 
@@ -309,7 +309,6 @@ while score[0] < 10 and score[1] < 10:
         time.sleep(0.5) 
     pyglow.all(0)
 
-    # TODO Ask Tim about what this does & what its for
     if serves[player_serve] == 0:
         serves[player_serve] = 5
         if player_serve == 0:
