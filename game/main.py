@@ -87,7 +87,7 @@ def update_bat_pos(player):
         bat_position[player] = new_pos
 
 
-# Undraw and re-draw the players scores
+# Un-draw and re-draw the players scores
 def print_score():
     global score
     output("\033[42m")
@@ -108,21 +108,26 @@ def move_and_draw_ball():
     global active_led
     global leds
     global led_steps
+
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+
     # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
     if ball_position[0] == window_size[0] / 2 and ball_position[1] in net_pos:
         output("\033[47m")
     else:
         output("\033[42m")
     output(" ")
-    # Then update the ball position
+
+    # Update the ball position
     ball_position[0] += ball_motion[0]
     ball_position[1] += ball_motion[1]
-    # Update the onboard LED
+
+    # Update the on board LED
     GPIO.output(leds[active_led], False)
     active_led = ball_position[0]/led_steps
     GPIO.output(leds[active_led], True)
+
     # Finally draw the new ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     output("\033[47m")
@@ -238,15 +243,20 @@ def match():
     move_and_draw_ball()
     print(str(ball_position) + "\n" + str(bat_position))
     return
+
+    move_and_draw_ball()  # TODO check if this is breaking stuff by being called here
     while not check_point_scored():
         now = time.time()
         delta += (now - last_time) / update_freq
         last_time = now
+
         update_bat_pos(0)
         update_bat_pos(1)
+
         while delta >= 1:
             delta -= 1
             updates += 1
+
             # Check if the ball is inside the scores and re-draw if necessary
             print_score_check = False
             if ball_position[0] >= 29 and ball_position[0] <= 31:
@@ -255,27 +265,42 @@ def match():
             elif ball_position[0] >= 48 and ball_position[0] <= 50:
                 if ball_position[1] >= 2 and ball_position[1] <= 7:
                     print_score_check = True
+
             move_and_draw_ball()
             check_wall_collision()
             check_paddle_collision()
+
             if print_score_check:
                 print_score()
+
             print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
+
         if time.time() - timer > 1:
             print("UPS: " + str(updates))
             timer = time.time()
             updates = 0
 
+
 # Main game loop:
 # Runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
-    # Check for button press to serve here, wait if not (wait for input interrupt?)
-    if False:
-        pass
+    if player_serve == 0:
+        ball_position[0] = 4
+    else:
+        ball_position[0] = window_size[0] - 3
+
+    # Wait for button press to serve here, wait if not (wait for input interrupt?)
+    while False:
+        update_bat_pos(0)
+        update_bat_pos(1)
+        ball_position[1] = bat_position[player_serve] + 2
+
     serves[player_serve] -= 1
     match()
+
     # Re-draw the scores
     print_score()
+
     # PyGlow effects
     for i in range(1, 7):
         pyglow.led([i, i+6, i+12], 255)
@@ -284,6 +309,8 @@ while score[0] < 10 and score[1] < 10:
         pyglow.led([i, i+6, i+12], 0)
         time.sleep(0.5) 
     pyglow.all(0)
+
+    # TODO Ask Tim about what this does & what its for
     if serves[player_serve] == 0:
         serves[player_serve] = 5
         if player_serve == 0:
