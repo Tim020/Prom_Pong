@@ -162,7 +162,10 @@ class ANSIEscape:
 
 class I2C:
     ADC_ADDRESS = 0x21
-    bus = smbus.SMBus(1)
+    bus = None
+
+    def __init__(self):
+        self.bus = smbus.SMBus(1)
 
     @staticmethod
     def endian_swap(raw):

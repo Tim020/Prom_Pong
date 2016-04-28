@@ -3,7 +3,6 @@ from services import ANSIEscape, I2C, ButtonListener
 from PyGlow import PyGlow
 from math import ceil
 import time
-import smbus
 import random
 import RPi.GPIO as GPIO
 
@@ -272,8 +271,8 @@ for i in leds:
     GPIO.output(i, False)
 
 # Set up button listeners for players
-p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
-p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
+#p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
+#p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -323,9 +322,6 @@ def match():
             print("UPS: " + str(updates))
             timer = time.time()
             updates = 0
-
-while True:
-    print(i2c.get_adc_value(1))
 
 # Main game loop, runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
