@@ -264,4 +264,4 @@ class ButtonListener:
         """
         just a no args wrapper for add_event_detect so we can pass it to a func easier
         """
-        GPIO.add_event_detect(self.channel, self.edge, self.db_callback_wrapper())
+        GPIO.add_event_detect(self.channel, self.edge, self.db_callback_wrapper)
