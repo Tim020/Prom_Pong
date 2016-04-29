@@ -1,7 +1,7 @@
 from serial import Serial
 from services import ANSIEscape, I2C, ButtonListener
 from PyGlow import PyGlow
-from math import ceil
+from math import floor
 import time
 import random
 import RPi.GPIO as GPIO
@@ -71,7 +71,7 @@ def update_bat_pos(player):
     else:
         raise ValueError("player param must be 0 or 1")
     player_input = i2c.get_adc_value(channel)
-    new_pos = ceil(player_input / voltage_range)
+    new_pos = floor(player_input / voltage_range) + 1
 
     # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
     # Works sort of like a Schmitt trigger
@@ -153,6 +153,20 @@ def move_and_draw_ball():
     output("\033[47m")
     output(" ")
 
+def move_and_draw_ball_serve():
+    global ball_position
+    global player_serve
+    global bat_position
+    
+    new_pos =  bat_position[player_serve] + 2
+    if ball_position[1] != new_pos:
+        output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+        output("\033[42m")
+        output(" ")
+        ball_position[1] = new_pos
+        output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+        output("\033[47m")
+        output(" ")
 
 # Checks if the ball has hit the top or bottom edge and updates the motion as appropriate
 def check_wall_collision():
@@ -199,19 +213,19 @@ def check_point_scored():
     return False
 
 def get_serve_p1():
-    return not GPIO.input(2)
+    return GPIO.input(9)
 
 def get_serve_p2():
     return GPIO.input(10)
 
 def set_serve_p1():
     global serve
-    print("Player 1 served!")
+    print("Set P1 serve")
     serve[0] = True
 
 def set_serve_p2():
     global serve
-    print("Player 2 served!")
+    print("Set P2 serve")
     serve[1] = True
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
@@ -235,7 +249,7 @@ if not debug:
         GPIO.setup(i, GPIO.OUT)
 
     # Enable the pins for the serve buttons
-    GPIO.setup(2, GPIO.IN)
+    GPIO.setup(9, GPIO.IN)
     GPIO.setup(10, GPIO.IN)
 
 # Initial clear of the screen and hide the cursor
@@ -271,8 +285,11 @@ for i in leds:
     GPIO.output(i, False)
 
 # Set up button listeners for players
-#p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
-#p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
+p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
+p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
+
+while True:
+    pass
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -338,8 +355,7 @@ while score[0] < 10 and score[1] < 10:
     while not serve[player_serve]:
         update_bat_pos(0)
         update_bat_pos(1)
-        ball_position[1] = bat_position[player_serve] + 2
-        move_and_draw_ball()
+        move_and_draw_ball_serve()
 
     # Player has served, decrese the serves left
     serves[player_serve] -= 1
