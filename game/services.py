@@ -1,5 +1,6 @@
 import threading
 import smbus
+import RPi.GPIO as GPIO
 
 
 class ANSIEscape:
@@ -224,46 +225,35 @@ class I2C:
 
 
 class ButtonListener:
-    _getter = None
-    cb = None
-    _debounce = True
-    _polling_rate = 0.01
-    _default_time_left = 10
-    _db_time_left = _default_time_left
+    channel = None
+    edge = None
+    callback = None
 
-    def __init__(self, getter, cb, debounce=True, polling_rate=_polling_rate):
-        """
-        Creates a new button listener
-        :param getter: a getter function for the button you want to watch
-        :param cb: a callback function to execute when the button is pressed
-        :param debounce: should the button listener perform a software debounce?
-        :param polling_rate: the rate in seconds that the button should be polled
-        """
-        self._getter = getter
-        self.cb = cb
-        self._debounce = debounce
-        self._polling_rate = polling_rate
-        if self._debounce:
-            self._check_routine()
+    def __init__(self, channel, edge, callback, debounce=True):
+        self.channel = channel
+        self.edge = edge
+        self.callback = callback
+
+        if debounce:
+            self.start_detecting_db()
         else:
-            self._no_db_check_routine()
+            self.start_detecting_no_db()
 
-    def _no_db_check_routine(self):
-        if self._getter():
-            self.cb()
-        threading.Timer(self._polling_rate, self._no_db_check_routine).start()
+    def db_callback_wrapper(self):
+        """
+        Removes event detection for 0.1 seconds after a rising edge to prevent multiple activations
+        """
+        GPIO.remove_event_detect(self.channel)
+        threading.Timer(0.1, self.start_detecting_db).start()
 
-    def _check_routine(self):
-        pressed = self._getter()
-        if pressed and self._db_time_left > 0:
-            self._db_time_left -= 1
-            threading.Timer(0.004, self._check_routine).start()
+    def start_detecting_no_db(self):
+        """
+        just a no args wrapper for add_event_detect so we can pass it to a func easier
+        """
+        GPIO.add_event_detect(self.channel, self.edge, self.callback)
 
-        elif pressed and self._db_time_left <= 0:
-            self._db_time_left = self._default_time_left
-            self.cb()
-            threading.Timer(self._polling_rate, self._check_routine).start()
-
-        else:
-            self._db_time_left = self._default_time_left
-            threading.Timer(self._polling_rate, self._check_routine).start()
+    def start_detecting_db(self):
+        """
+        just a no args wrapper for add_event_detect so we can pass it to a func easier
+        """
+        GPIO.add_event_detect(self.channel, self.edge, self.db_callback_wrapper())
