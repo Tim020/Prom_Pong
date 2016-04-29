@@ -1,0 +1,2 @@
+from game.audio import *
+audio = Audio
