@@ -17,6 +17,8 @@ score = [0, 0]
 # Size of the player's bats
 default_bat_size = 4
 bat_size = [default_bat_size, default_bat_size]
+# Big things left
+power_ups = [2, 2]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # How wide the voltage range is for each possible bat_position
@@ -42,8 +44,6 @@ serve = [False, False]
 ball_speeds = [float(10), float(5), float(15)]
 
 update_freq = ball_speeds[0] / window_size[0]
-last_time = time.time()
-timer = time.time()
 delta = 0
 updates = 0
 i2c = I2C()
@@ -153,6 +153,20 @@ def move_and_draw_ball():
     output("\033[47m")
     output(" ")
 
+def move_and_draw_ball_serve():
+    global ball_position
+    global player_serve
+    global bat_position
+    
+    new_pos =  bat_position[player_serve] + 2
+    if ball_position[1] != new_pos:
+        output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+        output("\033[42m")
+        output(" ")
+        ball_position[1] = new_pos
+        output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+        output("\033[47m")
+        output(" ")
 
 # Checks if the ball has hit the top or bottom edge and updates the motion as appropriate
 def check_wall_collision():
@@ -199,19 +213,17 @@ def check_point_scored():
     return False
 
 def get_serve_p1():
-    return not GPIO.input(2)
+    return GPIO.input(9)
 
 def get_serve_p2():
     return GPIO.input(10)
 
 def set_serve_p1():
     global serve
-    print("Player 1 served!")
     serve[0] = True
 
 def set_serve_p2():
     global serve
-    print("Player 2 served!")
     serve[1] = True
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
@@ -235,7 +247,7 @@ if not debug:
         GPIO.setup(i, GPIO.OUT)
 
     # Enable the pins for the serve buttons
-    GPIO.setup(2, GPIO.IN)
+    GPIO.setup(9, GPIO.IN)
     GPIO.setup(10, GPIO.IN)
 
 # Initial clear of the screen and hide the cursor
@@ -271,8 +283,8 @@ for i in leds:
     GPIO.output(i, False)
 
 # Set up button listeners for players
-#p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
-#p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
+p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
+p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -283,6 +295,9 @@ def match():
     global timer
     global ball_position
     global bat_position
+    
+    last_time = time.time()
+    timer = time.time()
 
     move_and_draw_ball()
     while not check_point_scored():
@@ -338,8 +353,7 @@ while score[0] < 10 and score[1] < 10:
     while not serve[player_serve]:
         update_bat_pos(0)
         update_bat_pos(1)
-        ball_position[1] = bat_position[player_serve] + 2
-        move_and_draw_ball()
+        move_and_draw_ball_serve()
 
     # Player has served, decrese the serves left
     serves[player_serve] -= 1
@@ -353,6 +367,9 @@ while score[0] < 10 and score[1] < 10:
 
     # Start the match
     match()
+
+    # Reset the powerups
+    power_ups = [2, 2]
 
     # Re-draw the scores
     print_score()
@@ -373,4 +390,3 @@ while score[0] < 10 and score[1] < 10:
             player_serve = 1
         else:
             player_serve = 0
-    break
