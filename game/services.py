@@ -230,6 +230,13 @@ class ButtonListener:
     callback = None
 
     def __init__(self, channel, edge, callback, debounce=True):
+        """
+        Creates a new button listener
+        :param channel: The GPIO channel to watch
+        :param edge: GPIO.RISING or GPIO.FALLING
+        :param callback: Func to callback for when button is pressed. Must take a single paramater, the channel.
+        :param debounce: Should the button be debounced?
+        """
         self.channel = channel
         self.edge = edge
         self.callback = callback
@@ -239,9 +246,10 @@ class ButtonListener:
         else:
             self.start_detecting_no_db()
 
-    def db_callback_wrapper(self):
+    def db_callback_wrapper(self, channel=None):
         """
         Removes event detection for 0.1 seconds after a rising edge to prevent multiple activations
+        :param channel: GPIO events pass us this addition paramater.
         """
         GPIO.remove_event_detect(self.channel)
         threading.Timer(0.1, self.start_detecting_db).start()
