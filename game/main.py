@@ -71,7 +71,7 @@ def update_bat_pos(player):
     else:
         raise ValueError("player param must be 0 or 1")
     player_input = i2c.get_adc_value(channel)
-    new_pos = ceil(player_input / voltage_range) + 1
+    new_pos = ceil(player_input / voltage_range)
 
     # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
     # Works sort of like a Schmitt trigger
