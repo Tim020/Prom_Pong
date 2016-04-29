@@ -17,6 +17,8 @@ score = [0, 0]
 # Size of the player's bats
 default_bat_size = 4
 bat_size = [default_bat_size, default_bat_size]
+# Big things left
+power_ups = [2, 2]
 # Top position of the bat for each player (initially in the middle)
 bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0]) / 2]
 # How wide the voltage range is for each possible bat_position
@@ -218,12 +220,10 @@ def get_serve_p2():
 
 def set_serve_p1():
     global serve
-    print("Set P1 serve")
     serve[0] = True
 
 def set_serve_p2():
     global serve
-    print("Set P2 serve")
     serve[1] = True
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
@@ -285,9 +285,6 @@ for i in leds:
 # Set up button listeners for players
 p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
 p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
-
-while True:
-    pass
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -371,6 +368,9 @@ while score[0] < 10 and score[1] < 10:
     # Start the match
     match()
 
+    # Reset the powerups
+    power_ups = [2, 2]
+
     # Re-draw the scores
     print_score()
 
@@ -390,4 +390,3 @@ while score[0] < 10 and score[1] < 10:
             player_serve = 1
         else:
             player_serve = 0
-    break
