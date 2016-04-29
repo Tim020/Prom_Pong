@@ -1,7 +1,7 @@
 from serial import Serial
 from services import ANSIEscape, I2C, ButtonListener
 from PyGlow import PyGlow
-from math import ceil
+from math import floor
 import time
 import random
 import RPi.GPIO as GPIO
@@ -71,7 +71,7 @@ def update_bat_pos(player):
     else:
         raise ValueError("player param must be 0 or 1")
     player_input = i2c.get_adc_value(channel)
-    new_pos = ceil(player_input / voltage_range)
+    new_pos = floor(player_input / voltage_range) + 1
 
     # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
     # Works sort of like a Schmitt trigger
