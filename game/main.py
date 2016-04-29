@@ -42,8 +42,6 @@ serve = [False, False]
 ball_speeds = [float(10), float(5), float(15)]
 
 update_freq = ball_speeds[0] / window_size[0]
-last_time = time.time()
-timer = time.time()
 delta = 0
 updates = 0
 i2c = I2C()
@@ -300,6 +298,9 @@ def match():
     global timer
     global ball_position
     global bat_position
+    
+    last_time = time.time()
+    timer = time.time()
 
     move_and_draw_ball()
     while not check_point_scored():
