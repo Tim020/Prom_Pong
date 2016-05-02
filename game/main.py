@@ -25,7 +25,7 @@ bat_position = [(window_size[1] - bat_size[0]) / 2, (window_size[1] - bat_size[0
 #   1538 Comes from the range of values the ADC can give us between 0.5V and 2.5V
 voltage_range = 1538 / ((window_size[1] - default_bat_size) + 1)
 # Ball position
-ball_position = [4, window_size[1]/2]
+ball_position = [4, window_size[1] / 2]
 # Ball motion
 ball_motion = [0, 0]
 # Which player has the serve?
@@ -76,7 +76,7 @@ def update_bat_pos(player):
     # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
     # Works sort of like a Schmitt trigger
     if new_pos == bat_position[player] + 1:
-        if player_input > ((new_pos-1) * voltage_range) + (voltage_range / 8):
+        if player_input > ((new_pos - 1) * voltage_range) + (voltage_range / 8):
             new_pos = bat_position[player]
     elif new_pos == bat_position[player] - 1:
         if player_input < (new_pos * voltage_range) - (voltage_range / 8):
@@ -93,19 +93,20 @@ def update_bat_pos(player):
             start_x = 3
         else:
             start_x = window_size[0] - 2
-        #output(ANSIEscape.undraw_bat(start_x, bat_position[player]))
+        # output(ANSIEscape.undraw_bat(start_x, bat_position[player]))
         output("\033[42m")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player]) + " ")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 1) + " ")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 2) + " ")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 3) + " ")
         bat_position[player] = new_pos
-        #output(ANSIEscape.draw_bat(start_x, bat_position[player]))
+        # output(ANSIEscape.draw_bat(start_x, bat_position[player]))
         output("\033[40m")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player]) + " ")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 1) + " ")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 2) + " ")
         output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 3) + " ")
+
 
 # Un-draw and re-draw the players scores
 def print_score():
@@ -145,7 +146,7 @@ def move_and_draw_ball():
 
     # Update the on board LED
     GPIO.output(leds[active_led], False)
-    active_led = ball_position[0]/led_steps
+    active_led = ball_position[0] / led_steps
     GPIO.output(leds[active_led], True)
 
     # Finally draw the new ball
@@ -153,12 +154,13 @@ def move_and_draw_ball():
     output("\033[47m")
     output(" ")
 
+
 def move_and_draw_ball_serve():
     global ball_position
     global player_serve
     global bat_position
-    
-    new_pos =  bat_position[player_serve] + 2
+
+    new_pos = bat_position[player_serve] + 2
     if ball_position[1] != new_pos:
         output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
         output("\033[42m")
@@ -167,6 +169,7 @@ def move_and_draw_ball_serve():
         output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
         output("\033[47m")
         output(" ")
+
 
 # Checks if the ball has hit the top or bottom edge and updates the motion as appropriate
 def check_wall_collision():
@@ -212,19 +215,24 @@ def check_point_scored():
             return True
     return False
 
+
 def get_serve_p1():
     return GPIO.input(9)
 
+
 def get_serve_p2():
     return GPIO.input(10)
+
 
 def set_serve_p1():
     global serve
     serve[0] = True
 
+
 def set_serve_p2():
     global serve
     serve[1] = True
+
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
@@ -237,7 +245,7 @@ if not debug:
 
     # Set up the PyGlow module
     pyglow = PyGlow()
-   
+
     # Set up the RPi.GPIO
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
@@ -286,6 +294,7 @@ for i in leds:
 p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
 p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
 
+
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
 def match():
@@ -295,7 +304,7 @@ def match():
     global timer
     global ball_position
     global bat_position
-    
+
     last_time = time.time()
     timer = time.time()
 
@@ -326,17 +335,18 @@ def match():
             move_and_draw_ball()
             check_wall_collision()
             check_paddle_collision()
-            
+
             # Draw the score again if the ball has gone through it
             if print_score_check:
                 print_score()
 
-            #print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
+                # print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
 
         if time.time() - timer > 1:
             print("UPS: " + str(updates))
             timer = time.time()
             updates = 0
+
 
 # Main game loop, runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
@@ -376,11 +386,11 @@ while score[0] < 10 and score[1] < 10:
 
     # PyGlow effects
     for i in range(1, 7):
-        pyglow.led([i, i+6, i+12], 255)
+        pyglow.led([i, i + 6, i + 12], 255)
         time.sleep(0.5)
     for i in range(6, 0, -1):
-        pyglow.led([i, i+6, i+12], 0)
-        time.sleep(0.5) 
+        pyglow.led([i, i + 6, i + 12], 0)
+        time.sleep(0.5)
     pyglow.all(0)
 
     # Change serving player if current one has no serves left

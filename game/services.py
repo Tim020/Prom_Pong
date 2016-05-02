@@ -246,5 +246,3 @@ class ButtonListener:
 
     def start_detect(self):
         GPIO.add_event_detect(self.channel, self.edge, callback=self.cb_wrapper)
-
-
