@@ -21,18 +21,18 @@ class ANSIEscape:
         pass
 
     @staticmethod
-    def draw_bat(start_x, start_y):
+    def draw_bat(start_x, start_y, size):
         # Set the background colour to be black
         ret_seq = "\033[40m"
-        for i in range(0, 4):
+        for i in range(0, size):
             ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
         return ret_seq
 
     @staticmethod
-    def undraw_bat(start_x, start_y):
+    def undraw_bat(start_x, start_y, size):
         # Set the background colour to be green
         ret_seq = "\033[42m"
-        for i in range(0, 4):
+        for i in range(0, size):
             ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
         return ret_seq
 
