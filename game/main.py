@@ -187,6 +187,7 @@ def check_paddle_collision():
     global bat_position
     global bat_size
     global ball_motion
+    global update_freq
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
             ball_motion[0] *= -1
