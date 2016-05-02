@@ -89,35 +89,32 @@ def update_bat_pos(player):
 
     # Update the position
     if new_pos != bat_position[player]:
+        # Work out the x-position to draw the bat at
         if player == 0:
             start_x = 3
         else:
             start_x = window_size[0] - 2
-        # output(ANSIEscape.undraw_bat(start_x, bat_position[player]))
-        output("\033[42m")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player]) + " ")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 1) + " ")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 2) + " ")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 3) + " ")
+        # Un-draw the current bat
+        output(ANSIEscape.undraw_bat(start_x, bat_position[player], bat_size[player]))
+        # Update the bat position
         bat_position[player] = new_pos
-        # output(ANSIEscape.draw_bat(start_x, bat_position[player]))
-        output("\033[40m")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player]) + " ")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 1) + " ")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 2) + " ")
-        output(ANSIEscape.set_cursor_position(start_x, bat_position[player] + 3) + " ")
+        # Redraw the new bat
+        output(ANSIEscape.draw_bat(start_x, bat_position[player], bat_size[player]))
 
 
 # Un-draw and re-draw the players scores
 def print_score():
     global score
+    # Set the colour to green
     output("\033[42m")
+    # Clear the area the scores are drawn in
     for y in range(0, 5):
         output(ANSIEscape.set_cursor_position(29, 2 + y))
         output(" " * 3)
     for y in range(0, 5):
         output(ANSIEscape.set_cursor_position(48, 2 + y))
         output(" " * 3)
+    # Print the two scores
     output(ANSIEscape.get_numerical_text(score[0], 0))
     output(ANSIEscape.get_numerical_text(score[1], 1))
 
@@ -130,7 +127,6 @@ def move_and_draw_ball():
     global leds
     global led_steps
 
-    # TODO Check undraw problem. Is escape code fine?
     # First "un-draw" the current ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     # Check what colour to re-draw the background pixel with (ie is the ball "in" the net?)
@@ -160,11 +156,15 @@ def move_and_draw_ball_serve():
     global player_serve
     global bat_position
 
+    # Centre the ball on the serving players paddle
     new_pos = bat_position[player_serve] + 2
+    # If the ball has moved, un-draw and redraw it
     if ball_position[1] != new_pos:
+        # Move the cursor to the correct position, set the background colour and un-draw the ball
         output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
         output("\033[42m")
         output(" ")
+        # Move the cursor to the correct position, set the background colour and re-draw the ball
         ball_position[1] = new_pos
         output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
         output("\033[47m")
