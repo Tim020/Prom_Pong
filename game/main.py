@@ -325,11 +325,11 @@ def match():
 
             # Check if the ball is inside the scores and re-draw if necessary
             print_score_check = False
-            if ball_position[0] >= 29 and ball_position[0] <= 31:
-                if ball_position[1] >= 2 and ball_position[1] <= 7:
+            if 29 <= ball_position[0] <= 31:
+                if 2 <= ball_position[1] <= 7:
                     print_score_check = True
-            elif ball_position[0] >= 48 and ball_position[0] <= 50:
-                if ball_position[1] >= 2 and ball_position[1] <= 7:
+            elif 48 <= ball_position[0] <= 50:
+                if 2 <= ball_position[1] <= 7:
                     print_score_check = True
 
             # Logic to move ball and check for collisions
@@ -341,10 +341,7 @@ def match():
             if print_score_check:
                 print_score()
 
-                # print("Ball Position: " + str(ball_position) + " | Ball Motion: " + str(ball_motion))
-
         if time.time() - timer > 1:
-            print("UPS: " + str(updates))
             timer = time.time()
             updates = 0
 
@@ -366,7 +363,7 @@ while score[0] < 10 and score[1] < 10:
         update_bat_pos(1)
         move_and_draw_ball_serve()
 
-    # Player has served, decrese the serves left
+    # Player has served, decrease the serves left
     serves[player_serve] -= 1
     serve[player_serve] = False
 
@@ -378,9 +375,6 @@ while score[0] < 10 and score[1] < 10:
 
     # Start the match
     match()
-
-    # Reset the powerups
-    power_ups = [2, 2]
 
     # Re-draw the scores
     print_score()
