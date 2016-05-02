@@ -4,6 +4,7 @@ from PyGlow import PyGlow
 from math import floor
 import time
 import random
+import threading
 import RPi.GPIO as GPIO
 
 debug = False
@@ -235,6 +236,50 @@ def set_serve_p2():
     serve[1] = True
 
 
+def get_power_up_p1():
+    return GPIO.input(8)
+
+
+def get_power_up_p2():
+    return GPIO.input(11)
+
+
+def set_power_up_p1():
+    global bat_size
+    global power_ups
+    global default_bat_size
+
+    if power_ups[0] > 0:
+        power_ups[0] -= 1
+        bat_size[0] = default_bat_size * 2
+        threading.Timer(15, reset_power_up_p1)
+
+
+def set_power_up_p2():
+    global bat_size
+    global power_ups
+    global default_bat_size
+
+    if power_ups[1] > 0:
+        power_ups[1] -= 1
+        bat_size[1] = default_bat_size * 2
+        threading.Timer(15, reset_power_up_p2)
+
+
+def reset_power_up_p1():
+    global bat_size
+    global default_bat_size
+
+    bat_position[0] = default_bat_size
+
+
+def reset_power_up_p2():
+    global bat_size
+    global default_bat_size
+
+    bat_position[1] = default_bat_size
+
+
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
     # Open Pi serial port, speed 57600 bits per second
@@ -256,8 +301,10 @@ if not debug:
         GPIO.setup(i, GPIO.OUT)
 
     # Enable the pins for the serve buttons
+    GPIO.setup(8, GPIO.IN)
     GPIO.setup(9, GPIO.IN)
     GPIO.setup(10, GPIO.IN)
+    GPIO.setup(11, GPIO.IN)
 
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
@@ -294,6 +341,8 @@ for i in leds:
 # Set up button listeners for players
 p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
 p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
+p1_power = ButtonListener(get_power_up_p1, set_power_up_p1)
+p2_power = ButtonListener(get_power_up_p2, set_power_up_p2)
 
 
 # Main loop for a single match (until a point is scored)
