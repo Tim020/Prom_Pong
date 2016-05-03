@@ -236,7 +236,7 @@ def set_power_up_p1():
     if power_ups[0] > 0 and bat_size[0] == default_bat_size:
         power_ups[0] -= 1
         bat_size[0] = default_bat_size * 2
-        threading.Timer(15, reset_power_up_p1)
+        threading.Timer(15, reset_power_up_p1).start()
 
 
 def set_power_up_p2():
@@ -247,7 +247,7 @@ def set_power_up_p2():
     if power_ups[1] > 0 and bat_size[1] == default_bat_size:
         power_ups[1] -= 1
         bat_size[1] = default_bat_size * 2
-        threading.Timer(15, reset_power_up_p2)
+        threading.Timer(15, reset_power_up_p2).start()
 
 
 def reset_power_up_p1():
