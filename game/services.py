@@ -1,5 +1,6 @@
 import threading
 import smbus
+import RPi.GPIO as GPIO
 
 
 class ANSIEscape:
@@ -20,18 +21,18 @@ class ANSIEscape:
         pass
 
     @staticmethod
-    def draw_bat(start_x, start_y):
+    def draw_bat(start_x, start_y, size):
         # Set the background colour to be black
         ret_seq = "\033[40m"
-        for i in range(0, 4):
+        for i in range(0, size):
             ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
         return ret_seq
 
     @staticmethod
-    def undraw_bat(start_x, start_y):
+    def undraw_bat(start_x, start_y, size):
         # Set the background colour to be green
         ret_seq = "\033[42m"
-        for i in range(0, 4):
+        for i in range(0, size):
             ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i) + " "
         return ret_seq
 
@@ -224,46 +225,25 @@ class I2C:
 
 
 class ButtonListener:
-    _getter = None
-    cb = None
-    _debounce = True
-    _polling_rate = 0.01
-    _default_time_left = 10
-    _db_time_left = _default_time_left
+    channel = None
+    edge = GPIO.FALLING
+    callback = None
+    debounce = True
 
-    def __init__(self, getter, cb, debounce=True, polling_rate=_polling_rate):
-        """
-        Creates a new button listener
-        :param getter: a getter function for the button you want to watch
-        :param cb: a callback function to execute when the button is pressed
-        :param debounce: should the button listener perform a software debounce?
-        :param polling_rate: the rate in seconds that the button should be polled
-        """
-        self._getter = getter
-        self.cb = cb
-        self._debounce = debounce
-        self._polling_rate = polling_rate
-        if self._debounce:
-            self._check_routine()
-        else:
-            self._no_db_check_routine()
+    def __init__(self, channel, edge, callback, debounce=True):
+        self.channel = channel        
+        self.edge = edge
+        self.debounce = debounce
+        self.callback = callback
 
-    def _no_db_check_routine(self):
-        if self._getter():
-            self.cb()
-        threading.Timer(self._polling_rate, self._no_db_check_routine).start()
+        self.start_detect()
 
-    def _check_routine(self):
-        pressed = self._getter()
-        if pressed and self._db_time_left > 0:
-            self._db_time_left -= 1
-            threading.Timer(0.004, self._check_routine).start()
+    def cb_wrapper(self, channel):
+        if self.debounce:
+            GPIO.remove_event_detect(channel)
+            threading.Timer(0.1, self.start_detect).start()
 
-        elif pressed and self._db_time_left <= 0:
-            self._db_time_left = self._default_time_left
-            self.cb()
-            threading.Timer(self._polling_rate, self._check_routine).start()
+        self.callback()
 
-        else:
-            self._db_time_left = self._default_time_left
-            threading.Timer(self._polling_rate, self._check_routine).start()
+    def start_detect(self, *args):
+        GPIO.add_event_detect(self.channel, self.edge, callback=self.cb_wrapper)
