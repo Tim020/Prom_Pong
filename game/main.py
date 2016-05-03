@@ -43,7 +43,7 @@ net_pos = []
 # Has the player served?
 serve = [False, False]
 # Different timings for the ball to travel across the screen
-ball_speeds = [float(10), float(5), float(15)]
+ball_speeds = [float(10), float(10), float(5), float(15)]
 
 update_freq = ball_speeds[0] / window_size[0]
 delta = 0
@@ -185,6 +185,7 @@ def check_wall_collision():
 
 
 # Checks if the ball has hit a paddle and updates the motion as appropriate
+# TODO: make the rebound direction depend on where on the paddle the ball has hit, maybe decrease default bat size to 3?
 def check_paddle_collision():
     global ball_position
     global bat_position
@@ -405,13 +406,15 @@ while score[0] < 10 and score[1] < 10:
 
     # Player has served, decrease the serves left
     serves[player_serve] -= 1
+    # Reset the serve button
     serve[player_serve] = False
 
-    # Set the direction of the ball
+    # Set the initial motion of the ball
     if player_serve == 0:
         ball_motion[0] = 1
     else:
         ball_motion[0] = -1
+    ball_motion[1] = random.choice(-1, -1, 0, 1, 1)
 
     # Start the match
     match()
