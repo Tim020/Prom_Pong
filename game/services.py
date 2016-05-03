@@ -231,6 +231,7 @@ class ButtonListener:
     debounce = True
 
     def __init__(self, channel, edge, callback, debounce=True):
+        self.channel = channel        
         self.edge = edge
         self.debounce = debounce
         self.callback = callback
@@ -244,5 +245,5 @@ class ButtonListener:
 
         self.callback()
 
-    def start_detect(self):
+    def start_detect(self, *args):
         GPIO.add_event_detect(self.channel, self.edge, callback=self.cb_wrapper)

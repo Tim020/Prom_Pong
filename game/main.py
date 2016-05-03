@@ -218,14 +218,6 @@ def check_point_scored():
     return False
 
 
-def get_serve_p1():
-    return GPIO.input(9)
-
-
-def get_serve_p2():
-    return GPIO.input(10)
-
-
 def set_serve_p1():
     global serve
     serve[0] = True
@@ -236,20 +228,12 @@ def set_serve_p2():
     serve[1] = True
 
 
-def get_power_up_p1():
-    return GPIO.input(8)
-
-
-def get_power_up_p2():
-    return GPIO.input(11)
-
-
 def set_power_up_p1():
     global bat_size
     global power_ups
     global default_bat_size
-
-    if power_ups[0] > 0:
+    print("P1 Power Up Pressed")
+    if power_ups[0] > 0 and bat_size[0] == default_bat_size:
         power_ups[0] -= 1
         bat_size[0] = default_bat_size * 2
         threading.Timer(15, reset_power_up_p1)
@@ -259,8 +243,8 @@ def set_power_up_p2():
     global bat_size
     global power_ups
     global default_bat_size
-
-    if power_ups[1] > 0:
+    print("P2 Power Up Pressed")
+    if power_ups[1] > 0 and bat_size[1] == default_bat_size:
         power_ups[1] -= 1
         bat_size[1] = default_bat_size * 2
         threading.Timer(15, reset_power_up_p2)
@@ -319,8 +303,8 @@ for i in range(0, window_size[1]):
     output(" " * window_size[0])
 
 # Draw bats for player 1 and 2
-output(ANSIEscape.draw_bat(3, bat_position[0]))
-output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1]))
+output(ANSIEscape.draw_bat(3, bat_position[0], bat_size[0]))
+output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1], bat_size[1]))
 
 # Change background colour and draw the net
 output("\033[47m")
@@ -339,10 +323,14 @@ for i in leds:
     GPIO.output(i, False)
 
 # Set up button listeners for players
-p1_serve = ButtonListener(get_serve_p1, set_serve_p1)
-p2_serve = ButtonListener(get_serve_p2, set_serve_p2, False)
-p1_power = ButtonListener(get_power_up_p1, set_power_up_p1)
-p2_power = ButtonListener(get_power_up_p2, set_power_up_p2)
+p1_serve = ButtonListener(9, GPIO.RISING, set_serve_p1)
+#p2_serve = ButtonListener(10, GPIO.RISING, set_serve_p2)
+p1_power = ButtonListener(8, GPIO.FALLING, set_power_up_p1, False)
+#p2_power = ButtonListener(11, GPIO.RISING, set_power_up_p2)
+
+while True:
+    print "{}".format(serve[0])
+    print "{} {}".format(GPIO.input(9), GPIO.input(8))
 
 
 # Main loop for a single match (until a point is scored)
