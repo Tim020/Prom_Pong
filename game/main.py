@@ -1,5 +1,6 @@
 from serial import Serial
 from services import ANSIEscape, I2C, ButtonListener
+from audio import Audio
 from PyGlow import PyGlow
 from math import floor
 import time
@@ -46,6 +47,8 @@ ball_speeds = [float(10), float(5), float(15)]
 
 update_freq = ball_speeds[0] / window_size[0]
 delta = 0
+last_time = 0
+timer = 0
 updates = 0
 i2c = I2C()
 
@@ -54,7 +57,6 @@ i2c = I2C()
 def output(seq):
     if debug:
         pass
-        # print(repr(seq))
     else:
         serialPort.write(seq)
 
@@ -232,7 +234,6 @@ def set_power_up_p1():
     global bat_size
     global power_ups
     global default_bat_size
-    print("P1 Power Up Pressed")
     if power_ups[0] > 0 and bat_size[0] == default_bat_size:
         power_ups[0] -= 1
         bat_size[0] = default_bat_size * 2
@@ -243,7 +244,6 @@ def set_power_up_p2():
     global bat_size
     global power_ups
     global default_bat_size
-    print("P2 Power Up Pressed")
     if power_ups[1] > 0 and bat_size[1] == default_bat_size:
         power_ups[1] -= 1
         bat_size[1] = default_bat_size * 2
@@ -253,20 +253,18 @@ def set_power_up_p2():
 def reset_power_up_p1():
     global bat_size
     global default_bat_size
-
     bat_position[0] = default_bat_size
 
 
 def reset_power_up_p2():
     global bat_size
     global default_bat_size
-
     bat_position[1] = default_bat_size
 
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
 if not debug:
-    # Open Pi serial port, speed 57600 bits per second
+    # Open Pi serial port, speed 115200 bits per second
     serialPort = Serial("/dev/ttyAMA0", 115200)
 
     # Should not need, but just in case
@@ -284,11 +282,14 @@ if not debug:
     for i in leds:
         GPIO.setup(i, GPIO.OUT)
 
-    # Enable the pins for the serve buttons
+    # Enable the pins for the serve and power-up buttons
     GPIO.setup(8, GPIO.IN)
     GPIO.setup(9, GPIO.IN)
     GPIO.setup(10, GPIO.IN)
     GPIO.setup(11, GPIO.IN)
+
+    # Create the audio object
+    audio = Audio()
 
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
@@ -324,13 +325,9 @@ for i in leds:
 
 # Set up button listeners for players
 p1_serve = ButtonListener(9, GPIO.RISING, set_serve_p1)
-#p2_serve = ButtonListener(10, GPIO.RISING, set_serve_p2)
+p2_serve = ButtonListener(10, GPIO.RISING, set_serve_p2)
 p1_power = ButtonListener(8, GPIO.FALLING, set_power_up_p1, False)
-#p2_power = ButtonListener(11, GPIO.RISING, set_power_up_p2)
-
-while True:
-    print "{}".format(serve[0])
-    print "{} {}".format(GPIO.input(9), GPIO.input(8))
+p2_power = ButtonListener(11, GPIO.RISING, set_power_up_p2)
 
 
 # Main loop for a single match (until a point is scored)
@@ -343,11 +340,13 @@ def match():
     global ball_position
     global bat_position
 
+    # Timing control initialisation
     last_time = time.time()
     timer = time.time()
 
     move_and_draw_ball()
     while not check_point_scored():
+        # Timing control loop
         now = time.time()
         delta += (now - last_time) / update_freq
         last_time = now
@@ -356,7 +355,9 @@ def match():
         update_bat_pos(0)
         update_bat_pos(1)
 
+        # If there has been enough time elapsed to update the ball, do so
         while delta >= 1:
+            # Reset the time difference and increase the update count
             delta -= 1
             updates += 1
 
@@ -380,11 +381,13 @@ def match():
 
         if time.time() - timer > 1:
             timer = time.time()
+            print "UPS: {}".format(updates)
             updates = 0
 
 
 # Main game loop, runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
+    # Align the X position of the ball to be on the edge of the serving player's paddle
     if player_serve == 0:
         ball_position[0] = 4
     else:
@@ -394,7 +397,7 @@ while score[0] < 10 and score[1] < 10:
     ball_motion[0] = 0
     ball_motion[1] = 0
 
-    # Wait for button press to serve here, wait if not (wait for input interrupt?)
+    # Wait for button press to serve here, until that time still allow the paddles to move and update them accordingly
     while not serve[player_serve]:
         update_bat_pos(0)
         update_bat_pos(1)
@@ -416,7 +419,7 @@ while score[0] < 10 and score[1] < 10:
     # Re-draw the scores
     print_score()
 
-    # PyGlow effects
+    # PyGlow effects for point scored
     for i in range(1, 7):
         pyglow.led([i, i + 6, i + 12], 255)
         time.sleep(0.5)
