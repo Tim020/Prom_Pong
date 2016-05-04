@@ -104,6 +104,7 @@ def update_bat_pos(player):
         # Redraw the new bat
         output(ANSIEscape.draw_bat(start_x, bat_position[player], bat_size[player]))
 
+
 # Un-draw and re-draw the players scores
 def print_score():
     global score
@@ -188,6 +189,7 @@ def check_wall_collision():
                 ball_motion[1] = 1
         else:
             ball_motion[1] *= -1
+
 
 # Checks if the ball has hit a paddle and updates the motion as appropriate
 # TODO: make the rebound direction depend on where on the paddle the ball has hit, maybe decrease default bat size to 3?
@@ -352,6 +354,7 @@ p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
 p1_power = PollingButtonListener(i2c.get_adc_gpio, set_power_up_p1)
 p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
 
+
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
 def match():
@@ -409,7 +412,7 @@ def match():
 
 # Main game loop, runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
-    #Undraw the ball
+    # Undraw the ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
     output("\033[42m")
     output(" ")
@@ -467,4 +470,4 @@ while score[0] < 10 and score[1] < 10:
         else:
             player_serve = 0
 
-#TODO: Clear screen and print winner or something
+# TODO: Clear screen and print winner or something
