@@ -79,10 +79,10 @@ def update_bat_pos(player):
     # If the bat has only moved only into the position next to it, check that it has moved in quite a bit
     # Works sort of like a Schmitt trigger
     if new_pos == bat_position[player] + 1:
-        if player_input > ((new_pos - 1) * voltage_range) + (voltage_range / 8):
+        if player_input > ((new_pos - 1) * voltage_range) + (voltage_range / 32):
             new_pos = bat_position[player]
     elif new_pos == bat_position[player] - 1:
-        if player_input < (new_pos * voltage_range) - (voltage_range / 8):
+        if player_input < (new_pos * voltage_range) - (voltage_range / 32):
             new_pos = bat_position[player]
 
     # Check whether the bottom of the bat is within the screen, if not move it up
@@ -181,8 +181,14 @@ def check_wall_collision():
     global ball_motion
     # Is the ball at the top or bottom edge (ignore x position)
     if ball_position[1] == 1 or ball_position[1] == window_size[1]:
-        ball_motion[1] *= -1
-
+        # Check if the ball is rolling along the wall edge, give it some motion if it is
+        if ball_motion[1] == 0:
+            if ball_position[1] == 1:
+                ball_motion[1] = -1
+            elif ball_position[1] == window_size[1]:
+                ball_motion[1] = 1
+        else:
+            ball_motion[1] *= -1
 
 # Checks if the ball has hit a paddle and updates the motion as appropriate
 # TODO: make the rebound direction depend on where on the paddle the ball has hit, maybe decrease default bat size to 3?
@@ -331,7 +337,7 @@ for i in leds:
 # Set up button listeners for players
 p1_serve = ButtonListener(9, GPIO.FALLING, set_serve_p1)
 p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
-#p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
+p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
 p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
 
 # Main loop for a single match (until a point is scored)
@@ -391,8 +397,10 @@ def match():
 
 # Main game loop, runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
-    #Might not work    
-    move_and_draw_ball_serve()
+    #Undraw the ball
+    output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
+    output("\033[42m")
+    output(" ")
     # Align the X position of the ball to be on the edge of the serving player's paddle
     if player_serve == 0:
         ball_position[0] = 4
