@@ -258,3 +258,27 @@ class ButtonListener:
     def start_detect(self, *args):
         GPIO.remove_event_detect(self.channel)
         GPIO.add_event_detect(self.channel, self.edge, callback=self.cb_wrapper)
+
+
+class PollingButtonListener:
+    _getter = None
+    cb = None
+    _polling_rate = 0.001
+    _default_time_left = 10
+    _db_time_left = 0
+
+    def __init__(self, getter, cb, polling_rate=_polling_rate):
+
+        self._getter = getter
+        self.cb = cb
+        self._polling_rate = polling_rate
+        
+        self._check_routine()
+
+
+    def _check_routine(self):
+        pressed = self._getter()
+        if pressed:
+            self.cb()
+
+        threading.Timer(self._polling_rate, self._check_routine).start()

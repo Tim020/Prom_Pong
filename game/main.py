@@ -1,5 +1,5 @@
 from serial import Serial
-from services import ANSIEscape, I2C, ButtonListener
+from services import *
 from audio import Audio
 from PyGlow import PyGlow
 from math import floor
@@ -309,7 +309,7 @@ if not debug:
     # Create the audio object
     audio = Audio()
 
-# Maybe?
+# Play intro music
 audio.play_intro_music()
 
 # Initial clear of the screen and hide the cursor
@@ -347,11 +347,8 @@ for i in leds:
 # Set up button listeners for players
 p1_serve = ButtonListener(9, GPIO.FALLING, set_serve_p1)
 p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
-#p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
+p1_power = PollingButtonListener(i2c.get_adc_gpio, set_power_up_p1)
 p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
-
-while True:
-    print i2c.get_adc_gpio()
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
