@@ -163,6 +163,7 @@ class ANSIEscape:
 
 class I2C:
     ADC_ADDRESS = 0x21
+    ADC_GPIO = 0x24
     bus = None
 
     def __init__(self):
@@ -222,6 +223,15 @@ class I2C:
             data = 1538
 
         return data
+
+        
+    def get_adc_gpio(self, channel=0):
+        if channel < 0 or channel > 7:
+            raise ValueError("Channel must be in the range 0-7")
+            
+        data = self.bus.read_word_data(self.ADC_GPIO, 0x00)
+            
+        return data & 0x01
 
 
 class ButtonListener:

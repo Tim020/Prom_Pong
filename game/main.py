@@ -350,6 +350,9 @@ p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
 #p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
 p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
 
+while True:
+    print i2c.get_adc_gpio()
+
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
 def match():
