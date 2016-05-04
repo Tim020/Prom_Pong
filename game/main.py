@@ -309,6 +309,9 @@ if not debug:
     # Create the audio object
     audio = Audio()
 
+# Maybe?
+audio.play_intro_music()
+
 # Initial clear of the screen and hide the cursor
 output(ANSIEscape.clear_screen())
 output(ANSIEscape.reset_cursor())
@@ -424,6 +427,7 @@ while score[0] < 10 and score[1] < 10:
         update_bat_pos(1)
         move_and_draw_ball_serve()
 
+    audio.tone2(0.4)
     # Player has served, decrease the serves left
     serves[player_serve] -= 1
 
@@ -436,6 +440,7 @@ while score[0] < 10 and score[1] < 10:
 
     # Start the match
     match()
+    audio.tone1(0.4)
 
     # Reset the serve button
     serve[player_serve] = False
