@@ -101,9 +101,9 @@ class ANSIEscape:
             ret_seq += " "
             ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + 2)
             ret_seq += "   "
-            ret_seq += ANSIEscape.set_cursor_position(start_x + 3, start_y + 3)
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 3)
             ret_seq += " "
-            ret_seq += ANSIEscape.set_cursor_position(start_x + 3, start_y + 4)
+            ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + 4)
             ret_seq += " "
         elif number == 5:
             ret_seq += "   "
@@ -130,7 +130,7 @@ class ANSIEscape:
         elif number == 7:
             ret_seq += "   "
             for i in range(1, 5):
-                ret_seq += ANSIEscape.set_cursor_position(start_x, start_y + i)
+                ret_seq += ANSIEscape.set_cursor_position(start_x + 2, start_y + i)
                 ret_seq += " "
         elif number == 8:
             ret_seq += "   "

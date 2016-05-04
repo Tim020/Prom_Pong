@@ -258,13 +258,13 @@ def set_power_up_p2():
 def reset_power_up_p1():
     global bat_size
     global default_bat_size
-    bat_position[0] = default_bat_size
+    bat_size[0] = default_bat_size
 
 
 def reset_power_up_p2():
     global bat_size
     global default_bat_size
-    bat_position[1] = default_bat_size
+    bat_size[1] = default_bat_size
 
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
@@ -331,12 +331,8 @@ for i in leds:
 # Set up button listeners for players
 p1_serve = ButtonListener(9, GPIO.FALLING, set_serve_p1)
 p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
-p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
+#p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
 p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
-
-while True:
-    print GPIO.input(8)
-
 
 # Main loop for a single match (until a point is scored)
 # Keeps a stable update rate to ensure the ball travels across the screen in 2 seconds
@@ -395,6 +391,8 @@ def match():
 
 # Main game loop, runs while no player has a winning score
 while score[0] < 10 and score[1] < 10:
+    #Might not work    
+    move_and_draw_ball_serve()
     # Align the X position of the ball to be on the edge of the serving player's paddle
     if player_serve == 0:
         ball_position[0] = 4
@@ -413,18 +411,19 @@ while score[0] < 10 and score[1] < 10:
 
     # Player has served, decrease the serves left
     serves[player_serve] -= 1
-    # Reset the serve button
-    serve[player_serve] = False
 
     # Set the initial motion of the ball
     if player_serve == 0:
         ball_motion[0] = 1
     else:
         ball_motion[0] = -1
-    ball_motion[1] = random.choice(-1, -1, 0, 1, 1)
+    ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
 
     # Start the match
     match()
+
+    # Reset the serve button
+    serve[player_serve] = False
 
     # Re-draw the scores
     print_score()
@@ -445,3 +444,5 @@ while score[0] < 10 and score[1] < 10:
             player_serve = 1
         else:
             player_serve = 0
+
+#TODO: Clear screen and print winner or something
