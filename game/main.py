@@ -223,11 +223,13 @@ def check_point_scored():
 
 def set_serve_p1():
     global serve
+    print "Setting P1 serve"
     serve[0] = True
 
 
 def set_serve_p2():
     global serve
+    print "Setting P2 serve"
     serve[1] = True
 
 
@@ -235,6 +237,7 @@ def set_power_up_p1():
     global bat_size
     global power_ups
     global default_bat_size
+    print "Setting P1 power up"
     if power_ups[0] > 0 and bat_size[0] == default_bat_size:
         power_ups[0] -= 1
         bat_size[0] = default_bat_size * 2
@@ -245,6 +248,7 @@ def set_power_up_p2():
     global bat_size
     global power_ups
     global default_bat_size
+    print "Setting P2 power up"
     if power_ups[1] > 0 and bat_size[1] == default_bat_size:
         power_ups[1] -= 1
         bat_size[1] = default_bat_size * 2
@@ -325,10 +329,13 @@ for i in leds:
     GPIO.output(i, False)
 
 # Set up button listeners for players
-p1_serve = ButtonListener(9, GPIO.RISING, set_serve_p1)
-p2_serve = ButtonListener(10, GPIO.RISING, set_serve_p2)
-p1_power = ButtonListener(8, GPIO.FALLING, set_power_up_p1, False)
-p2_power = ButtonListener(11, GPIO.RISING, set_power_up_p2)
+p1_serve = ButtonListener(9, GPIO.FALLING, set_serve_p1)
+p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
+p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
+p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
+
+while True:
+    print GPIO.input(8)
 
 
 # Main loop for a single match (until a point is scored)
