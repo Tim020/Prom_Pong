@@ -223,7 +223,6 @@ def check_paddle_collision():
             elif dY <= bat_position[1] + 2 * divisions:
                 ball_motion[1] = -1
             ball_motion[0] *= -1
-            ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
             update_freq = random.choice(ball_speeds) / window_size[0]
             audio.tone1(0.2)
 
