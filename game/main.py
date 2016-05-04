@@ -104,7 +104,6 @@ def update_bat_pos(player):
         # Redraw the new bat
         output(ANSIEscape.draw_bat(start_x, bat_position[player], bat_size[player]))
 
-
 # Un-draw and re-draw the players scores
 def print_score():
     global score
@@ -243,10 +242,12 @@ def set_power_up_p1():
     global bat_size
     global power_ups
     global default_bat_size
-    print "Setting P1 power up"
     if power_ups[0] > 0 and bat_size[0] == default_bat_size:
+        print "Setting P1 power up"
         power_ups[0] -= 1
+        output(ANSIEscape.undraw_bat(3, bat_position[0], bat_size[0]))
         bat_size[0] = default_bat_size * 2
+        output(ANSIEscape.draw_bat(3, bat_position[0], bat_size[0]))
         threading.Timer(15, reset_power_up_p1).start()
 
 
@@ -254,23 +255,29 @@ def set_power_up_p2():
     global bat_size
     global power_ups
     global default_bat_size
-    print "Setting P2 power up"
     if power_ups[1] > 0 and bat_size[1] == default_bat_size:
+        print "Setting P2 power up"
         power_ups[1] -= 1
+        output(ANSIEscape.undraw_bat(window_size[0] - 2, bat_position[1], bat_size[1]))
         bat_size[1] = default_bat_size * 2
+        output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1], bat_size[1]))
         threading.Timer(15, reset_power_up_p2).start()
 
 
 def reset_power_up_p1():
     global bat_size
     global default_bat_size
+    output(ANSIEscape.undraw_bat(3, bat_position[0], bat_size[0]))
     bat_size[0] = default_bat_size
+    output(ANSIEscape.draw_bat(3, bat_position[0], bat_size[0]))
 
 
 def reset_power_up_p2():
     global bat_size
     global default_bat_size
+    output(ANSIEscape.undraw_bat(window_size[0] - 2, bat_position[1], bat_size[1]))
     bat_size[1] = default_bat_size
+    output(ANSIEscape.draw_bat(window_size[0] - 2, bat_position[1], bat_size[1]))
 
 
 # Test code to see whether we are running properly on the Pi or not, opens the serial connection if we are
@@ -337,7 +344,7 @@ for i in leds:
 # Set up button listeners for players
 p1_serve = ButtonListener(9, GPIO.FALLING, set_serve_p1)
 p2_serve = ButtonListener(10, GPIO.FALLING, set_serve_p2)
-p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
+#p1_power = ButtonListener(8, GPIO.RISING, set_power_up_p1, False)
 p2_power = ButtonListener(11, GPIO.FALLING, set_power_up_p2)
 
 # Main loop for a single match (until a point is scored)
