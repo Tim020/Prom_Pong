@@ -149,7 +149,7 @@ def move_and_draw_ball():
 
     # Finally draw the new ball
     output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
-    output("\033[47m")
+    output("\033[43m")
     output(" ")
 
 
@@ -169,7 +169,7 @@ def move_and_draw_ball_serve():
         # Move the cursor to the correct position, set the background colour and re-draw the ball
         ball_position[1] = new_pos
         output(ANSIEscape.set_cursor_position(ball_position[0], ball_position[1]))
-        output("\033[47m")
+        output("\033[43m")
         output(" ")
 
 
@@ -202,11 +202,13 @@ def check_paddle_collision():
             ball_motion[0] *= -1
             ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
             update_freq = random.choice(ball_speeds) / window_size[0]
+            audio.tone1(0.2)
     elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
             ball_motion[0] *= -1
             ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
             update_freq = random.choice(ball_speeds) / window_size[0]
+            audio.tone1(0.2)
 
 
 # Check if a point has been scored, returns true if there has
@@ -427,7 +429,7 @@ while score[0] < 10 and score[1] < 10:
         update_bat_pos(1)
         move_and_draw_ball_serve()
 
-    audio.tone2(0.4)
+    audio.tone1(0.4)
     # Player has served, decrease the serves left
     serves[player_serve] -= 1
 
@@ -440,7 +442,7 @@ while score[0] < 10 and score[1] < 10:
 
     # Start the match
     match()
-    audio.tone1(0.4)
+    audio.tone2(0.4)
 
     # Reset the serve button
     serve[player_serve] = False
