@@ -240,8 +240,8 @@ class ButtonListener:
 
     def cb_wrapper(self, channel):
         if self.debounce:
-            GPIO.remove_event_detect(channel)
-            threading.Timer(0.1, self.start_detect).start()
+            GPIO.remove_event_detect(self.channel)
+            threading.Timer(0.10, self.start_detect).start()
 
         self.callback()
 
