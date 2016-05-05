@@ -68,7 +68,7 @@ def update_bat_pos(player):
     """
     global bat_position
     if player == 0:
-        channel = 1
+        channel = 4
     elif player == 1:
         channel = 2
     else:
@@ -192,7 +192,6 @@ def check_wall_collision():
 
 
 # Checks if the ball has hit a paddle and updates the motion as appropriate
-# TODO: make the rebound direction depend on where on the paddle the ball has hit, maybe decrease default bat size to 3?
 def check_paddle_collision():
     global ball_position
     global bat_position
@@ -447,8 +446,9 @@ while score[0] < 10 and score[1] < 10:
     match()
     audio.tone2(0.4)
 
-    # Reset the serve button
-    serve[player_serve] = False
+    # Reset the serve buttons
+    serve[0] = False
+    serve[1] = False
 
     # Re-draw the scores
     print_score()
@@ -456,10 +456,10 @@ while score[0] < 10 and score[1] < 10:
     # PyGlow effects for point scored
     for i in range(1, 7):
         pyglow.led([i, i + 6, i + 12], 255)
-        time.sleep(0.5)
+        time.sleep(0.25)
     for i in range(6, 0, -1):
         pyglow.led([i, i + 6, i + 12], 0)
-        time.sleep(0.5)
+        time.sleep(0.25)
     pyglow.all(0)
 
     # Change serving player if current one has no serves left
@@ -470,4 +470,9 @@ while score[0] < 10 and score[1] < 10:
         else:
             player_serve = 0
 
-# TODO: Clear screen and print winner or something
+output(ANSIEscape.clear_screen())
+output(ANSIEscape.reset_cursor())
+if score[0] > score[1]:
+   output("Player 1 Wins")
+else:
+    output("Player 2 Wins")

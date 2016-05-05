@@ -221,7 +221,7 @@ class I2C:
             data = 0
         elif data > 1538:
             data = 1538
-
+        
         return data
 
         

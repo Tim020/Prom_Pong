@@ -51,17 +51,16 @@ class Audio:
         except:
             pass
 
-    def play_intro_music(self):
-        self.__intro_music()
-
     # Outputs a single tone to GPIO pin 17 using PWM
     # period: period of each pulse in the tone
     # mark & space: sets the mark-space ratio - should add up to 1
     # note_val: the length of time that the tone should sound for, in seconds
-    def __play_tone(self, period, note_val=__QUAVER, mark=0.5, space=0.5):
-        if not (mark + space == 1):
+    def __play_tone(self, period, note_val=__QUAVER, mark=0.5):
+        
+        if (mark >= 1):
             raise ValueError('Invalid mark-space ratio')
         else:
+            space = 1 - mark
             while (note_val > 0):
                 GPIO.output(17, True)
                 time.sleep(period * mark)
@@ -78,7 +77,7 @@ class Audio:
 			time.sleep(note_val)
 
     # Plays the intro music, private as it needs to be threaded, call from play_intro_music() instead
-    def __intro_music(self):
+    def play_intro_music(self):
         GPIO.output(4, True)
         GPIO.output(18, True)
         
