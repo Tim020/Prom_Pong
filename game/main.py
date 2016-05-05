@@ -17,7 +17,7 @@ serves = [5, 5]
 # Current score of each player
 score = [0, 0]
 # Size of the player's bats
-default_bat_size = 3
+default_bat_size = 4
 bat_size = [default_bat_size, default_bat_size]
 # Big things left
 power_ups = [2, 2]
@@ -201,27 +201,12 @@ def check_paddle_collision():
     global update_freq
     if ball_position[0] == 4:
         if bat_position[0] <= ball_position[1] <= bat_position[0] + bat_size[0]:
-            divisions = bat_size[0] // 3
-            dY = ball_position[1] - bat_position[0]
-            if dY <= bat_position[0] + divisions:
-                ball_motion[1] = 1
-            elif dY <= bat_position[0] + 2 * divisions:
-                ball_motion[1] = 0
-            elif dY <= bat_position[0] + 2 * divisions:
-                ball_motion[1] = -1
+            ball_motion[0] *= -1
             ball_motion[1] = random.choice([-1, -1, 0, 1, 1])
             update_freq = random.choice(ball_speeds) / window_size[0]
             audio.tone1(0.2)
     elif ball_position[0] == window_size[0] - 3:
         if bat_position[1] <= ball_position[1] <= bat_position[1] + bat_size[1]:
-            divisions = bat_size[0] // 3
-            dY = ball_position[1] - bat_position[0]
-            if dY <= bat_position[1] + divisions:
-                ball_motion[1] = 1
-            elif dY <= bat_position[1] + 2 * divisions:
-                ball_motion[1] = 0
-            elif dY <= bat_position[1] + 2 * divisions:
-                ball_motion[1] = -1
             ball_motion[0] *= -1
             update_freq = random.choice(ball_speeds) / window_size[0]
             audio.tone1(0.2)
